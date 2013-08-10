@@ -1,5 +1,6 @@
 from PyQt4 import QtGui, QtWebKit, QtCore, Qt
 from PyQt4.QtCore import Qt as QtConst
+from collections import OrderedDict
 
 # create Rich Text layout if it doesn't exist
 if 'ns_layouts' not in g.app.db:
@@ -64,6 +65,7 @@ class RTEEditor(QtGui.QWidget):
             ['---', 'strikeout', QtConst.Key_Underscore],
             ['FG', 'foreground', None],
             ['BG', 'background', None],
+            ['Font', 'font', None],
             ['+', 'larger', QtConst.Key_Plus],
             ['-', 'smaller', QtConst.Key_Minus],
         ]
@@ -81,6 +83,22 @@ class RTEEditor(QtGui.QWidget):
             btn.clicked.connect(
                 lambda checked, style=action[1]: self.set_style(style))
                 
+        self.styles = OrderedDict([
+            ("Paragraph", ['clear']),
+            ("Heading 1", ['bold', ('larger', 20)]),
+            ("Heading 2", ['bold', 'italic', ('larger', 16)]),
+            ("Heading 3", ['bold', 'italic', ('larger', 12), ('foreground', '#444')]),
+            ("Warning", ['bold', ('foreground', '#f00')]),
+            ("Latin", ['italic']),
+            ("Literal", [('background', '#ccc')]),
+        ])
+        
+        # style picker
+        style_menu = QtGui.QComboBox()
+        buttons.layout().addWidget(style_menu)
+        style_menu.addItems(self.styles.keys())
+        style_menu.currentIndexChanged.connect(self.apply_style)
+        
         # auto save checkbox
         self.auto = QtGui.QCheckBox("Auto")
         buttons.layout().addWidget(self.auto)
@@ -181,7 +199,7 @@ class RTEEditor(QtGui.QWidget):
             else:
                 pass  # discard edits
             
-    def set_style(self, style):
+    def set_style(self, style, value=None):
         format = QtGui.QTextCharFormat()
         
         if style == 'bold':
@@ -193,21 +211,36 @@ class RTEEditor(QtGui.QWidget):
         elif style == 'strikeout':
             format.setFontStrikeOut(True)
         elif style in ('foreground', 'background'):
-            cp = QtGui.QColorDialog()
-            if cp.exec_() != QtGui.QColorDialog.Rejected:
-                color = cp.selectedColor()
+            if not value:
+                cp = QtGui.QColorDialog()
+                if cp.exec_() != QtGui.QDialog.Rejected:
+                    color = cp.selectedColor()
+                else:
+                    color = None
             else:
-                color = None
+                color = QtGui.QColor(value)
             if color and style == 'foreground':
                 format.setForeground(color)
             elif color:
                 format.setBackground(color)
-        elif style in ('larger', 'smaller'):
-            size = self.te.textCursor().charFormat().fontPointSize()
-            if style == 'larger':
-                size += 1
+        elif style == 'font':
+            fd = QtGui.QFontDialog()
+            if fd.exec_() != QtGui.QDialog.Rejected:
+                font = fd.selectedFont()
             else:
-                size -= 1
+                font = None
+            if font:
+                format.setFont(font)
+        elif style in ('larger', 'smaller'):
+            
+            if not value:
+                size = self.te.textCursor().charFormat().fontPointSize()
+                if style == 'larger':
+                    size += 1
+                else:
+                    size -= 1
+            else:
+                size = value
             size = max(2, min(100, size))
             format.setFontPointSize(size)
             
@@ -217,6 +250,14 @@ class RTEEditor(QtGui.QWidget):
         else:
             self.te.textCursor().mergeCharFormat(format)
             self.te.mergeCurrentCharFormat(format)
+            
+    def apply_style(self, n):
+        style = self.styles[self.styles.keys()[n]]
+        for attr in style:
+            if isinstance(attr, tuple):
+                self.set_style(attr[0], attr[1])
+            else:
+                self.set_style(attr)
             
         
 class RTEPaneProvider:
