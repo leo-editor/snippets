@@ -1,6 +1,13 @@
 from PyQt4 import QtGui, QtWebKit, QtCore, Qt
 from PyQt4.QtCore import Qt as QtConst
 from collections import OrderedDict
+import sys
+
+if sys.version_info.major == 3:
+    toUtf8 = lambda x: x
+else:
+    toUtf8 = lambda x: x.toUtf8()
+    
 
 # create Rich Text layout if it doesn't exist
 if 'ns_layouts' not in g.app.db:
@@ -96,7 +103,7 @@ class RTEEditor(QtGui.QWidget):
         # style picker
         style_menu = QtGui.QComboBox()
         buttons.layout().addWidget(style_menu)
-        style_menu.addItems(self.styles.keys())
+        style_menu.addItems([i for i in self.styles.keys()])
         style_menu.currentIndexChanged.connect(self.apply_style)
         
         # auto save checkbox
@@ -122,7 +129,7 @@ class RTEEditor(QtGui.QWidget):
             if (event.key() == QtConst.Key_Return and 
                 event.modifiers() & QtConst.ControlModifier):
                 # Ctrl-Return - save edits
-                self.c.p.b = self.te.toHtml().toUtf8()
+                self.c.p.b = toUtf8(self.te.toHtml())
                 self.init_html = self.c.p.b
             elif (event.key() == QtConst.Key_Down and 
                 event.modifiers() & QtConst.AltModifier):
@@ -176,13 +183,13 @@ class RTEEditor(QtGui.QWidget):
             self.te.setHtml(p.b)
         else:
             self.te.setHtml("<pre>%s</pre>"%p.b)
-        self.init_html = self.te.toHtml().toUtf8()
+        self.init_html = toUtf8(self.te.toHtml())
             
     def unselect_node(self, tag, kwargs):
         c = kwargs['c']
         if c != self.c:
             return
-        if self.te.toHtml().toUtf8() != self.init_html:
+        if toUtf8(self.te.toHtml()) != self.init_html:
 
             if self.auto.isChecked():
                 ans = 'yes'
@@ -193,7 +200,7 @@ class RTEEditor(QtGui.QWidget):
                     "Save edits?"
                 )
             if ans == 'yes':
-                kwargs['old_p'].b = self.te.toHtml().toUtf8()
+                kwargs['old_p'].b = toUtf8(self.te.toHtml())
             elif ans == 'cancel':
                 return 'STOP'
             else:
@@ -252,7 +259,7 @@ class RTEEditor(QtGui.QWidget):
             self.te.mergeCurrentCharFormat(format)
             
     def apply_style(self, n):
-        style = self.styles[self.styles.keys()[n]]
+        style = self.styles[[i for i in self.styles.keys()][n]]
         for attr in style:
             if isinstance(attr, tuple):
                 self.set_style(attr[0], attr[1])
