@@ -4,20 +4,26 @@ import textwrap
 
 p = c.p
 if not p.h.startswith('@bk '):
-    nd = p.insertAfter()
+    nd = g.findNodeAnywhere(c, '@backup-nodes')
+    if nd:
+        nd = nd.insertAsNthChild(0)
+    else:
+        nd = p.insertAfter()
     ts = time.strftime("%Y-%m-%d %H:%M:%S")
     nd.h = "@bk %s %s" % (p.h, ts)
     s = '\n'.join(textwrap.wrap(
         base64.b64encode(p.b),
         break_long_words=True
     ))
-    nd.b = "# backup %s - %s\n\n%s" % (ts, p.h, s)
+    nd.b = "# backup %s - %s\n# %s\n\n%s" % (
+        ts, p.h, p.get_UNL(with_proto=True), s)
+    g.es("%s - backed up"%ts)
     c.redraw()
     c.bodyWantsFocusNow()
     
 else:
     
-    hdr, s = p.b.split('\n', 1)
+    hdr, s = p.b.split('\n\n', 1)
     if hdr.startswith("# backup"):  # decode
         hdr = hdr.replace('backup', 'BACKUP')
         p.b = "%s\n\n%s" % (
