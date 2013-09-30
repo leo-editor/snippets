@@ -18,8 +18,6 @@ def markup_inline(kw, kind='unknown'):
     # find out if last action was open or close, creates entry if needed
     last_type = c.user_dict.setdefault(
         'markup_inline', {'last': 'close'})['last']
-        
-    g.es(['in', last_type])
     
     p = c.p
     
