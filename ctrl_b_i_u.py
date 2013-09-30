@@ -66,10 +66,10 @@ def markup_inline_bold(kw):
     markup_inline(kw, kind='bold')
 
 @g.command('markup_inline_italic')
-def markup_inline_bold(kw):
+def markup_inline_italic(kw):
     markup_inline(kw, kind='italic')
 
 @g.command('markup_inline_underline')
-def markup_inline_bold(kw):
+def markup_inline_underline(kw):
     markup_inline(kw, kind='underline')
 
