@@ -1,7 +1,7 @@
 '''
 Prints a report to the log pane about tasks that are past due and not marked as 'done'
 
-Useful as an @button node
+Useful as an @button node, or perhaps an @command in myLeoSettings.leo
 
 Jake Peck 20131001
 '''
