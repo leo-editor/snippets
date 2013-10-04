@@ -1,9 +1,7 @@
+@language python
+
 '''
-Prints a report to the log pane about tasks that are past due and not marked as 'done'
-
-Useful as an @button node, or perhaps an @command in myLeoSettings.leo
-
-Jake Peck 20131001
+prints a report to the log pane about tasks that are past due and not marked as 'done'
 '''
 
 import datetime
@@ -13,7 +11,7 @@ n = []
 for p in c.all_positions():
   duedate = c.cleo.getat(p.v, 'duedate')
   priority = c.cleo.getat(p.v, 'priority')
-  if priority: priority = int(priority) # 100 = 'done', per todo.py
+  if priority: priority = int(priority)
   if (duedate and duedate < today 
       and priority != 100 and p.v not in n):
     n.append(p.v)
@@ -23,4 +21,4 @@ if len(n) == 0:
 else:
   g.es('The following tasks are past due:',color='red')
   for v in n:
-    g.es(v.h,color='red')
+    g.es(c.vnode2position(v).get_UNL(with_file=False, with_proto=False),color='red')
