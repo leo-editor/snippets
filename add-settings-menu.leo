@@ -5,8 +5,7 @@
 <leo_header file_format="2"/>
 <vnodes>
 <v t="ekr.20131114191618.17401" a="E"><vh>@settings</vh>
-<v t="maphew.20131115063329.1572" a="E"><vh>@menuat before </vh>
-<v t="maphew.20131115084533.1841"><vh>@menu &amp;Help</vh></v>
+<v t="maphew.20131115063329.1572" a="E"><vh>@menuat /help before</vh>
 <v t="maphew.20131115063329.9475"><vh>@item open-leo12pt-leo</vh></v>
 </v>
 <v t="ekr.20131114191618.17400"><vh>@data qt-gui-plugin-style-sheet</vh></v>
@@ -296,6 +295,5 @@ QTextEdit:focus#log-widget, LeoQTreeWidget:focus#treeWidget, QTextEdit:focus#ric
 <t tx="ekr.20131114191618.17401"></t>
 <t tx="maphew.20131115063329.1572"></t>
 <t tx="maphew.20131115063329.9475">Open &amp;leo12pt.leo</t>
-<t tx="maphew.20131115084533.1841"></t>
 </tnodes>
 </leo_file>
