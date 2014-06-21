@@ -1,0 +1,249 @@
+NOTE: these instructions are relevant but the embedded scripts are 
+superceded by the extracted scripts in this directory.
+
+Date: Sat, 21 Jun 2014 03:43:08 -0700 (PDT)
+From: Fidel N
+To: leo-editor@googlegroups.com
+Subject: Scripts for importing your mindmaps from MindJet and Freemind
+Reply-To: leo-editor@googlegroups.com
+
+Hi, I just made two scripts for importing from MindJet and Freemind.
+I really think those two should be in the menu "File -> import ->"
+Because when a new user comes to Leo, he most likely comes from any other 
+of the most famous outliners (IE freemind or mindjet).
+So it will feel very good to import their mindmaps with two clicks. I know 
+for sure I would have loved it.
+
+For importing your MindJet mindmap, first you have to export it to CSV, 
+using the following options:
+- Select the 'outline' layout when exporting
+- Tick all the options but the 'inlcude topic properties'
+
+Now you are ready to import your mindmap to Leo with this script. Copy it 
+and paste it into a node, replace the path with your mindmap path, and 
+execute the script (with the hotkey control + B):
+
+#Your currently selected node will be replaced with the outline you are 
+importing.
+#Replace the path with the path of your file:
+
+
+file_path = 'D:/exmample/mymindmap.csv'
+
+
+max_chars_in_header = 80 #Nodes with more characters than that (or with 
+line jumps) will be inserted as bodies instead of as header.
+
+
+#INSTRUCTIONS FOR EXPORTING FROM MINDJET: You need a csv file exported from 
+MindJet. When exporting, make sure you:
+# - Use the layout "outline"
+# - Tick all the options but "inlcude topic properties"
+
+
+
+
+import csv
+
+
+def get_row_level(row):
+    count = 0
+    while count<=len(row):
+        if row[count]:
+            return count+1
+        else:
+            count = count+1
+    return -1
+
+
+def get_row_string(row):
+    count = 0
+    while count<=len(row):
+        if row[count]:
+            return row[count]
+        else:
+            count = count+1
+    return None
+
+
+reader = csv.reader(open(file_path))
+
+
+initial_level = c.p.level()
+last_created_level = c.p.level()
+last_created_node = c.p.copy()
+
+
+
+
+for row in list(reader)[1:]:
+    new_level = get_row_level(row) + initial_level
+    get_row_string(row)
+    if new_level > last_created_level:
+        last_created_node = last_created_node.insertAsLastChild().copy()
+        last_created_node.b = get_row_string(row)
+        last_created_level = last_created_level+1
+    elif new_level == last_created_level:
+        last_created_node = last_created_node.insertAfter().copy()
+        last_created_node.b = get_row_string(row)
+    elif new_level < last_created_level:
+            
+        for item in last_created_node.parents():
+            if item.level() == new_level-1:
+                last_created_node = item.copy()
+                break
+
+
+        last_created_node = last_created_node.insertAsLastChild().copy()
+        last_created_node.b = get_row_string(row)
+        last_created_level = last_created_node.level()
+        
+for p in c.p.unique_subtree():
+    if len(p.b.splitlines())==1:
+        if len(p.b.splitlines()[0])<max_chars_in_header:
+            p.h = p.b.splitlines()[0]
+            p.b = ""
+        else:
+            p.h = "@node_with_long_text"
+    else:
+        p.h = "@node_with_long_text"
+
+
+c.redraw()
+
+If you are coming from Freemind, you just have to export your freemind 
+mindmap into html, then use this script.
+Copy and paste this script into a node, replace the path inside it with the 
+path where you have your mindmap.html file, then run the script (hotkey 
+control + B)
+
+
+#Your currently selected node will be replaced with the outline you are 
+importing.
+#Replace the path with the path of your file:
+    
+file_path = 'D:/exmample/mymindmap.mm.html'
+
+
+max_chars_in_header = 80 #Nodes with more characters than that (or with 
+line jumps) will be inserted as bodies instead of as header.
+
+
+#INSTRUCTIONS FOR EXPORTING FROM FREEMIND: Export your outline into html, 
+then you can use this script.
+
+
+import lxml.html
+
+
+global outline_dict
+
+
+outline_dict = {}
+
+
+global count
+count = 0
+
+
+def element_to_node(parent_node, element ):
+    global count
+    global outline_dict
+    count = count+1
+    my_actual_count = int(count)
+
+
+    if len(list(element.iterchildren())):
+        # if len(list(list(element.iterchildren())[0].iterchildren())):
+
+
+        outline_dict[str(my_actual_count)] = {}
+        outline_dict[parent_node]['children'].append(str(my_actual_count))
+        if len(list(list(element.iterchildren())[0].iterchildren())):
+            outline_dict[str(my_actual_count)]['string'] = list(list(element
+.iterchildren())[0].iterchildren())[0].text
+        else:
+            outline_dict[str(my_actual_count)]['string'] = list(element.
+iterchildren())[0].text
+        outline_dict[str(my_actual_count)]['children'] = list()
+        if len(list(element.iterchildren()))>1:
+            for child in list(element.iterchildren())[1].iterchildren():
+                element_to_node(str(my_actual_count),child)
+
+
+htmltree = lxml.html.parse(file_path)
+
+
+root = htmltree.getroot()
+
+
+body = root.findall('body')[0]
+outline_dict[str(0)] = {}
+outline_dict[str(0)]['children'] = list()
+outline_dict[str(count)]['string'] = list(list(body.iterchildren())[0].
+iterchildren())[0].text
+outline_dict[str(count)]['children'] = list()
+
+
+for item in list(list(body.iterchildren())[1].iterchildren()):
+    
+    element_to_node(str(0), item )
+    
+
+
+
+
+
+
+#Up to here, the script was for importing into a dict. Now we export that 
+dict into nodes:
+    
+def add_children_as_nodes(node_id_to_add, parent_id):
+
+
+    global outline_dict
+
+
+    for node in c.p.unique_subtree():
+        if node.h == parent_id:
+            my_parent = node.copy()
+            
+    newchild = my_parent.insertAsLastChild().copy()
+    newchild.h = node_id_to_add
+    newchild.b = outline_dict[node_id_to_add]['string']
+    
+    for child_id in outline_dict[node_id_to_add]['children']:
+        add_children_as_nodes(child_id, node_id_to_add)
+    
+
+
+c.p.h = str(0)
+c.p.b = outline_dict['0']['string']
+for child_id in outline_dict['0']['children']:
+    add_children_as_nodes(child_id, '0')
+
+
+for p in c.p.unique_subtree():
+    if len(p.b.splitlines())==1:
+        if len(p.b.splitlines()[0])<max_chars_in_header:
+            p.h = p.b.splitlines()[0]
+            p.b = ""
+        else:
+            p.h = "@node_with_long_text"
+    else:
+        p.h = "@node_with_long_text"
+
+
+c.redraw()
+
+And there you go, you just got your most loved mindmaps in Leo!
+
+Just one thing to add, you are only importing the text /data of your 
+mindmap, not the formats, colors, or media!
+
+-- 
+You received this message because you are subscribed to the Google Groups "leo-editor" group.
+To unsubscribe from this group and stop receiving emails from it, send an email to leo-editor+unsubscribe@googlegroups.com.
+To post to this group, send email to leo-editor@googlegroups.com.
+Visit this group at http://groups.google.com/group/leo-editor.
+For more options, visit https://groups.google.com/d/optout.
