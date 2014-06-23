@@ -33,7 +33,6 @@ def get_row_string(row):
 f = open(file_path)
 
 reader = csv.reader(f)
-f.close()
 initial_level = c.p.level()
 last_created_level = c.p.level()
 last_created_node = c.p.copy()
@@ -71,3 +70,5 @@ for p in c.p.unique_subtree():
         p.h = "@node_with_long_text"
 
 c.redraw()
+
+f.close()
