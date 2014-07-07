@@ -7,8 +7,13 @@ if hasattr(c, '_typing_idle'):
     g.unregisterHandler(hooks, c._typing_idle['handler'])
 else:
     # execute in 5 sec. from now, create a "namespace" c._typing_idle
-    # for out (two) variables
-    c._typing_idle = {'next': time.time() + 5}
+    # for our (two) variables
+    
+    # execute after an initial delay regardless of typing
+    # c._typing_idle = {'next': time.time() + 5}
+
+    # wait for some typing before starting timer
+    c._typing_idle = {'next': None}
 
 def handler(tag, kwargs, c=c):
     
@@ -23,9 +28,9 @@ def handler(tag, kwargs, c=c):
 
     # must be the idle hook, see if it's time to fire
         
-    if time.time() >= c._typing_idle['next']:
-        # wait for another keystroke or 5 million seconds
-        c._typing_idle['next'] = time.time() + 5000000
+    if c._typing_idle['next'] and time.time() >= c._typing_idle['next']:
+        # wait for another keystroke
+        c._typing_idle['next'] = None
         
         # code to do stuff here
         g.es('do stuff')
