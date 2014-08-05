@@ -1,7 +1,7 @@
 """
 Proof of concept for live code in Leo, ast tree experiment
 
-Put the code in this tree in a node and use the script-button
+Put the this code in a node and use the script-button
 button to create a button for that node.  Then put some simple code
 another node, like
 
@@ -13,9 +13,11 @@ def timespi(x):
 timespi(a)
 
 and use the button to run this code on that code, which executes
-top level node by node.  Actual implementation would need scanning
-from onIdle hook, keeping track of which blocks have changed,
+top level node by top level node.  Actual implementation would need
+scanning from onIdle hook, keeping track of which blocks have changed,
 re-calculating changed blocks and subsequent blocks, etc.
+
+Don't run this code on its self, that would be recursive :-)
 """
 
 import ast
