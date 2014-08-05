@@ -8,14 +8,16 @@ another node, like
 from math import pi
 a = 10+2
 a + 4
+a += 11.2
 def timespi(x):
     return x*pi
 timespi(a)
 
-and use the button to run this code on that code, which executes
-top level node by top level node.  Actual implementation would need
-scanning from onIdle hook, keeping track of which blocks have changed,
-re-calculating changed blocks and subsequent blocks, etc.
+and use the button to run this code on that code, which executes top
+level node by top level node, with results in the log pane. Actual
+implementation would need scanning from onIdle hook, keeping track of
+which blocks have changed, re-calculating changed blocks and subsequent
+blocks, etc.
 
 Don't run this code on its self, that would be recursive :-)
 """
@@ -53,5 +55,7 @@ for n, node in enumerate(nodes):
     if isinstance(node, ast.Assign):
         for target in node.targets:
             g.es("%s = %s" % (target.id, eval(target.id, scope)))
+    if isinstance(node, ast.AugAssign):
+        g.es("%s = %s" % (node.target.id, eval(node.target.id, scope)))
     if isinstance(node, ast.FunctionDef):
         g.es("function %s" % (node.name))
