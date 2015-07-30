@@ -1,3 +1,5 @@
+# NOTE: this is obsolete, see led.sh instead (leoremote / lproto is deprecated)
+
 #!/usr/bin/python
 """
 Load a file in a running Leo session from the command line.
