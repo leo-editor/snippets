@@ -91,7 +91,7 @@ def seen_already(tnd, nd, iname, o):
             
     for up in tnd.self_and_parents():
         if (hasattr(up.v, '_introspection_target') and
-            getattr(up.v, '_introspection_target') == o):
+            getattr(up.v, '_introspection_target') is o):
             break
     else:
         return False
