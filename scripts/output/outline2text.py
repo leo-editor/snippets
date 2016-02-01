@@ -1,8 +1,9 @@
 # template is everything between r""" and second """
 # placeholders are H heading B body C children, T ToDo priority
 # use \n in B and C lines for conditional blank lines
+from leo.core.leoQt import QtGui
 
-try:
+try:  # Python 2/3 compatibility
     unicode
 except NameError:
     unicode = str
@@ -63,7 +64,9 @@ def export_text(p, indent=''):
 if exp_only != 'cancel':
     for i in c.getSelectedPositions():
         export_text(i)
-    c.leo_screen.show('\n'.join(lines), 'text', plain=True)
+    # c.leo_screen.show('\n'.join(lines), 'text', plain=True)
+    QtGui.QApplication.clipboard().setText('\n'.join(lines))
+    g.es("Text copied to clipboard")
     
     filename = g.app.gui.runSaveFileDialog(c, 'Save to file')
     
