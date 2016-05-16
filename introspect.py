@@ -44,10 +44,10 @@ def show_obj(c, obj):
         things.setdefault(cname, []).append(instances[-1])
 
     if 'instance' in sub_mode:
-        tnd = c.p.insertAsNthChild(0)
+        tnd = c.p.v.insertAsNthChild(0)
         tnd.h = "<by name>"
     else:
-        tnd = c.p
+        tnd = c.p.v
 
     instances.sort()
     for iname, o in instances:
@@ -60,13 +60,13 @@ def show_obj(c, obj):
         
         if not seen_already(tnd, nd, iname, o):
             nd.h = "%s %s" % (iname, format_type(nd, o))
-            nd.v._introspection_target = o
+            nd._introspection_target = o
 
     if 'class' in sub_mode:
-        ttnd = c.p.insertAsNthChild(0)
+        ttnd = c.p.v.insertAsNthChild(0)
         ttnd.h = "<by class>"
     else:
-        ttnd = c.p
+        ttnd = c.p.v
 
     for cname in sorted(things):
     
@@ -85,13 +85,13 @@ def show_obj(c, obj):
             nd = tnd.insertAsLastChild()
             if not seen_already(tnd, nd, iname, o):
                 show_child(nd, iname, o)
-                nd.v._introspection_target = o
+                nd._introspection_target = o
          
 def seen_already(tnd, nd, iname, o):
             
-    for up in tnd.self_and_parents():
-        if (hasattr(up.v, '_introspection_target') and
-            getattr(up.v, '_introspection_target') is o):
+    for up in tnd.parents:
+        if (hasattr(up, '_introspection_target') and
+            getattr(up, '_introspection_target') is o):
             break
     else:
         return False
@@ -103,7 +103,7 @@ def seen_already(tnd, nd, iname, o):
             
 def show_child(nd, iname, o):
                 
-    nd.v._introspection_target = o
+    nd._introspection_target = o
     nd.h = "%s %s" % (format_type(nd, o), iname)
     
 docable = (
@@ -132,38 +132,38 @@ def format_type(nd, o):
 def show_list(c, list_):
     
     if len(list_) > 100:
-        nd = c.p.insertAsLastChild()
+        nd = c.p.v.insertAsLastChild()
         nd.h = "<%s of %d items truncated>" % len(list_.__class__.__name__, list_)
         
     if len(list_) == 0:
-        nd = c.p.insertAsLastChild()
+        nd = c.p.v.insertAsLastChild()
         nd.h = "<%s of 0 items>" % list_.__class__.__name__
         
     for n, i in enumerate(list_[:100]):
-        nd = c.p.insertAsLastChild()
+        nd = c.p.v.insertAsLastChild()
         show_child(nd, '', i)
         nd.h = "%d: %s" % (n, nd.h)
-        nd.v._introspection_target = i
+        nd._introspection_target = i
 
 def show_dict(c, dict_):
     
     if len(dict_) > 100:
-        nd = c.p.insertAsLastChild()
+        nd = c.p.v.insertAsLastChild()
         nd.h = "<dict of %d items truncated>" % len(dict_)
         
     if len(dict_) == 0:
-        nd = c.p.insertAsLastChild()
+        nd = c.p.v.insertAsLastChild()
         nd.h = "<dict of 0 items>"
         
     keys = dict_.keys()
     keys.sort()
         
     for k in keys[:100]:
-        nd = c.p.insertAsLastChild()
+        nd = c.p.v.insertAsLastChild()
         i = dict_[k]
         show_child(nd, '', i)
         nd.h = "%s: %s" % (k, nd.h)
-        nd.v._introspection_target = i
+        nd._introspection_target = i
 
 dispatch = {
     list: show_list,
