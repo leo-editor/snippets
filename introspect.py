@@ -88,16 +88,19 @@ def show_obj(c, obj):
                 nd._introspection_target = o
          
 def seen_already(tnd, nd, iname, o):
-            
-    for up in tnd.parents:
-        if (hasattr(up, '_introspection_target') and
-            getattr(up, '_introspection_target') is o):
+        
+    up = tnd.parents
+    while up:
+        if (hasattr(up[0], '_introspection_target') and
+            up[0]._introspection_target is o):
             break
+        up = up[0].parents
     else:
         return False
         
     nd.h = "[%s %s]" % (classname(o), iname)
-    nd.b = up.get_UNL(with_file=True, with_proto=True)
+    pos = c.vnode2position(up[0])
+    nd.b = pos.get_UNL(with_file=True, with_proto=True)
     
     return True
             
