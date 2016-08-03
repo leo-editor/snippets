@@ -3,6 +3,8 @@
 # Insert.  Then click the Action button that appears, and select
 # your widget.
 
+# Copy all this text (use Raw view) to a node, and run it (Ctrl-B) once
+
 from leo.core.leoQt import QtCore, QtWidgets
 class DemoProvider:
     def ns_provides(self):
