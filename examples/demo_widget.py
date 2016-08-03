@@ -4,6 +4,8 @@
 # your widget.
 
 # Copy all this text (use Raw view) to a node, and run it (Ctrl-B) once
+# After doing that, the pane divider right click context menu open window
+# submenu will have "Demo * slider" options.
 
 from leo.core.leoQt import QtCore, QtWidgets
 class DemoProvider:
