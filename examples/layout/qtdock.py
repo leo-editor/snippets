@@ -11,9 +11,9 @@ Things learned
  - instead override .closeEvent() to manage close / vs. hide
  - the central widget is a nuisance, easiest just to not have one,
    rather than manage moving dock widgets in and out of that role
- - allowing nested widgets comes at the price of more complicated
+ - allowing nested docks comes at the price of more complicated
    behavior, in return for more freedom in layouts
- - my regular workbook.leo layout requires nested widgets
+ - my regular workbook.leo layout requires nested docks
  - floating windows cannot contain docks, which is a major loss
    vs. NestedSplitter, might be able to address that by adding
    another main window, but (a) doesn't work out of the box, would
