@@ -1,6 +1,8 @@
 """
 Testing Qt Dock widgets as a replacement for NestedSplitter
 
+See https://github.com/leo-editor/leo-editor/issues/314
+
 Things learned
 
  - "close" control just hides the widget
