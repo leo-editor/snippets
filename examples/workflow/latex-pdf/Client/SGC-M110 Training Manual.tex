@@ -1,0 +1,191 @@
+%@+leo-ver=5-thin
+%@+node:largo84.20170410131222.2: * @file SGC-M110 Training Manual.tex
+%@@language tex
+\documentclass[addpoints,12pt,answers]{exam} %Use `,answers` for Facilitator and delete for Student version.
+%@+<< Paths >>
+%@+node:largo84.20170410131222.3: ** << Paths >>
+\newcommand{\MainPath}{C:/Main\space Document\space Path/}
+
+\newcommand{\TemplatePath}{\MainPath Templates/LaTex\space Documents/}
+\newcommand{\AgreementPath}{\MainPath Templates/Agreements/}
+\newcommand{\ResourcePath}{\MainPath Resources/}
+%@-<< Paths >>
+%@+<< Project Variables >>
+%@+node:largo84.20170410131222.4: ** << Project Variables >>
+\input{"Client\space Variables.txi"} % Sets the client name and other related client-specific commands.
+\newcommand{\theSchoolShort}{XYZ} % The short name of the class. Only change this line to reflect the correct school name.
+\newcommand{\theCourseShort}{ABC} % The short name of the online course. Only change this line to reflect the correct course name.
+%@-<< Project Variables >>
+%@+<< Document Variables >>
+%@+node:largo84.20170410131222.5: ** << Document Variables >>
+\newcommand{\UDI}{SGC-M110} % Unique Document Identifier (F=Form, H=Handout, Q=Test, Quiz or Exam, M=Manual, W=Worksheet, A=Article, C=Contract, S=Script)
+\newcommand{\docTitle}{Smith Grocery Training Manual} %  ...to show up in the header
+\newcommand{\REV}{17.04.10} % Revision number (date), used in combination w/ the UDI as in: FSS-Q101(15.06.08)
+
+\newcommand{\keywords}{sales training manual \theSchoolShort} %This information will fill in the meta info for PDF creation.
+
+%@+<< Fonts >>
+%@+node:largo84.20170410131222.6: *3* << Fonts >>
+%@+at
+% Use this section to define document fonts.
+%@@c
+
+\usepackage[T1]{fontenc}
+\usepackage{gentium} %Gentium
+
+%\usepackage{quattrocento} %Quattrocento
+%\usepackage{mathpazo} %Palatino
+%\usepackage{lmodern} %Latin Modern
+%\usepackage{cm-super} %Computer Modern Super (don't use, it may not be installed.)
+
+%@-<< Fonts >>
+%@+<< Packages >>
+%@+node:largo84.20170410131222.7: *3* << Packages >>
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{ifsym}
+\usepackage{MnSymbol}
+\usepackage{textcomp}
+\usepackage{verbatim}
+\usepackage{wasysym}
+\usepackage{ifpdf} %added to support checking to see if pdflatex is used
+\usepackage{hyperref}
+\usepackage{graphicx,color} % Necessary for adding images and other graphics.
+\usepackage{wrapfig} % This allows for wrapping text around images and figures.
+\graphicspath{C:/Images/} %Define path(s) to image files.
+\usepackage{array} %Extends the tabular environment
+\usepackage{xfrac} %Split level fractions \sfrac{<num>}{<den>}
+\usepackage[utf8]{inputenc} %Allows direct input of unicode characters, such as café.
+
+%@-<< Packages >>
+%@+<< Definitions >>
+%@+node:largo84.20170410131222.8: *3* << Definitions >>
+%@+others
+%@+node:largo84.20170410131222.9: *4* Sizes
+\setlength\answerlinelength{3in}
+\setlength\answerskip{0.1in}
+%\setlength\parindent{0in}
+%\setlength\parskip{1.5ex}
+%\setlength\parskip{6pt}
+\newcommand{\tinysbh}{.5in} %\sbh = solution box height (.5)=2 lines
+\newcommand{\smallsbh}{.75in} %\sbh = solution box height (.75)=3 lines
+\newcommand{\mediumsbh}{1in} %\sbh = solution box height (1)=4 lines
+\newcommand{\largesbh}{1.25in} %\sbh = solution box height (1.25)=5 lines
+\newcommand{\hugesbh}{1.5in} %\sbh = solution box height (1.5)=6 lines
+%@+node:largo84.20170410131222.10: *4* Exam Class Definitions
+\renewcommand{\solutiontitle}{\noindent{Facilitation Notes: }}
+
+\CorrectChoiceEmphasis{\color{red} \itshape}
+\SolutionEmphasis{\color{red} \itshape}
+\unframedsolutions % prevents solutions from being displayed inside an \fbox
+
+\newcommand\resetcheckboxchar{\checkboxchar{$\bigcirc$}}
+\resetcheckboxchar %Sets default display characters for check boxes.
+
+\newcommand\resetcheckedchar{\checkedchar{$\varoast$}} %varoast is a circle surroundeing an asterisk.
+\resetcheckedchar %Sets default display characters for correct choices on answer keys.
+
+\newcommand\truefalsecheckboxchar{\checkboxchar{\textbf{T or F}}} %Sets the default characters for True/False questions.
+\newcommand\truecheckedchar{\checkedchar{\textbf{T}}} %Sets the default character for True statements on answer keys.
+\newcommand\falsecheckboxchar{\checkboxchar{\textbf{F}}} %Sets the default character for False statements on answer keys.
+
+\checkboxchar{$\bigcirc$} %This displays an empty circle.
+\checkedchar{$\varoast$} %This displays a circle filled with an asterisk.
+%@-others
+
+%@-<< Definitions >>
+%@+<< Meta Info >>
+%@+node:largo84.20170410131222.11: *3* << Meta Info >>
+%@+at
+% Include at the beginning of all 'Grafton' and DDI documents after document variables and global definitions.
+%@@c
+\hypersetup{
+  pdftitle={\theSchool : \docTitle},
+  pdfauthor={Rob Keeney},
+  pdfsubject={\theSchool : \docTitle},
+  pdfkeywords={\keywords },
+  pdfstartview={Fit},
+  pdfpagelayout={SinglePage},
+  pdfdisplaydoctitle={True},
+  pdfpagemode={UseNone} %UseNone for no sidebar, UseOutlines to show bookmarks
+}
+
+\title{\theSchool : \docTitle}
+\author{Rob Keeney}
+\date{Revised: \today}
+%@-<< Meta Info >>
+%@+<< Page Headers and Footers >>
+%@+node:largo84.20170410131222.12: *3* << Page Headers and Footers >>
+%@+at
+% Include this section as the last preamble before \begin{document} for all 'Grafton' and DDI documents.
+% If there's a mismatch between this version and the 'global' version, use:
+% \input{"\TemplatePath Grafton\space Page\space Headers-Footers.txi"}
+%@@c
+%@+<< Page Style >>
+%@+node:largo84.20170410131222.13: *4* << Page Style >>
+\pagestyle{headandfoot} 
+% \runningheadrule % Use this one to skip a rule on the first page.
+\headrule
+\footrule
+%@-<< Page Style >>
+%@+<< Header >>
+%@+node:largo84.20170410131222.14: *4* << Header >>
+\header
+    {} %Left side header
+    {\bfseries \large \docTitle} % Center header
+    {} %Right side header
+%@-<< Header >>
+%@+<< Footer >>
+%@+node:largo84.20170410131222.15: *4* << Footer >>
+\footer
+    %Left
+    {\UDI (\REV )\\ \ifprintanswers \textcolor{red}{Facilitator Notes} \else \fi} % Left side includes the document identifier and revision date.
+    %Center
+    {\bfseries Footer Text \ifthenelse{\equal{\theSchoolShort}{XYZ}}{}{\\ \theSchool}} % Center includes `Footer Text` and the specific course name (if other than just XYZ).
+    %Right
+    {Page \thepage{} of \numpages} % Right side includes the paging information.
+%@-<< Footer >>
+%@-<< Page Headers and Footers >>
+%@-<< Document Variables >>
+
+\begin{document}
+    %@+<< Title Page >>
+    %@+node:largo84.20170410131222.16: ** << Title Page >>
+    %@+at
+    % Add the following title page if desired. Otherwise, comment it out.
+    %@@c
+
+    \makeatletter
+    \@addtoreset{section}{part} % This should reset the section counter when the part counter changes.
+    \makeatother
+
+    \pointsinrightmargin
+    \maketitle
+    \begin{center} %Add company logo.
+        \includegraphics[width=0.5\textwidth]{logo.png}
+    \end{center}
+    \clearpage
+    \tableofcontents
+    \clearpage
+
+
+    %@-<< Title Page >>
+    %@+<< Document Body >>
+    %@+node:largo84.20170410131222.17: ** << Document Body >>
+    %@+others
+    %@+node:largo84.20170410131404.2: *3* Reusable Content
+    \section[Handout 1]{Content 1}
+    \label{sec:content1}
+
+    \input{"\ResourcePath Reusable\space Content.txi"} %Inserts external content file.
+    %@+node:largo84.20170410131504.2: *3* More Content
+    \section[Handout 2]{More Content}
+    \label{sec:content2}
+
+    \input{"\ResourcePath More\space Content.txi"} %Inserts external content file.
+    %@-others
+    %@-<< Document Body >>
+\end{document}
+%@-leo
