@@ -73,16 +73,16 @@
 <v t="largo84.20170410123325.1"><vh>Workflow Overview</vh></v>
 <v t="largo84.20170410123813.1"><vh>Workflow Notes and Shortcuts</vh></v>
 <v t="largo84.20170410124219.1"><vh>Software Needed</vh></v>
-<v t="largo84.20170410124311.1"><vh>Document Example</vh>
+<v t="largo84.20170410124311.1" a="E"><vh>Document Example</vh>
 <v t="largo84.20170410124440.1"><vh>Resources</vh>
 <v t="largo84.20170410124929.1" a="E"><vh>(XXX-H120) Reusable Content</vh>
 <v t="largo84.20170410124935.1" a="E"><vh>@file Reusable Content.txi</vh></v>
 </v>
 </v>
-<v t="largo84.20170410125918.1"><vh>Smith Grocery Company (the client)</vh>
+<v t="largo84.20170410125918.1" a="E"><vh>Smith Grocery Company (the client)</vh>
 <v t="largo84.20170410130109.2"
 expanded="largo84.20170410130109.5,largo84.20170410130109.8,"><vh>@file SGC-H120 Reusable Content.tex</vh></v>
-<v t="largo84.20170410131222.2"
+<v t="largo84.20170410131222.2" a="E"
 expanded="largo84.20170410131222.8,largo84.20170410131222.12,largo84.20170410131222.17,"><vh>@file SGC-M110 Training Manual.tex</vh></v>
 </v>
 </v>
@@ -429,7 +429,7 @@ Add the following title page if desired. Otherwise, comment it out.
 <t tx="largo84.20170410124219.1">* Leo (of course, and its dependencies).
 * MiKTex for the LaTex distribution and package management (I have it set to auto-update as needed).
 * TeXNicCenter for processing (typesetting) to PDF output.</t>
-<t tx="largo84.20170410124311.1">This example shows a content file (Resources)  nd two document 'shells' (a student handout and a training manual) in the client directory.
+<t tx="largo84.20170410124311.1">This example shows a content file (Resources)  and two document 'shells' (a student handout and a training manual) in the client directory.
 </t>
 <t tx="largo84.20170410124440.1">@path Resources/
 </t>
