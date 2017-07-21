@@ -48,10 +48,18 @@
 <v t="vitalije.20170721193719.1"><vh>body lines ...</vh>
 <v t="ekr.20170719102447.37"><vh>body_lines_of_top_node</vh></v>
 <v t="ekr.20170719102447.33"><vh>body_lines_of_node</vh>
+<v t="vitalije.20170721210632.1"><vh>in verbatim</vh></v>
+<v t="vitalije.20170721210647.1"><vh>or verbatim</vh></v>
+<v t="vitalije.20170721210702.1"><vh>at doc</vh></v>
+<v t="vitalije.20170721210713.1"><vh>at code</vh></v>
+</v>
 <v t="ekr.20170719102447.34"><vh>body_raw_lines_of_node</vh>
 <v t="vitalije.20170721192544.1"><vh>if in verbatims</vh></v>
 <v t="vitalije.20170721192602.1"><vh>elif at verbatim sentinel</vh></v>
+<v t="vitalije.20170721202706.1"><vh>elif in raw mode</vh></v>
+<v t="vitalije.20170721203441.1"><vh>elif at raw start</vh></v>
 <v t="vitalije.20170721192639.1"><vh>elif at-all starts</vh></v>
+<v t="vitalije.20170721204227.1"><vh>elif in-all block</vh></v>
 <v t="vitalije.20170721192649.1"><vh>elif at-others starts</vh></v>
 <v t="vitalije.20170721192800.1"><vh>elif section starts</vh></v>
 <v t="vitalije.20170721192809.1"><vh>elif node starts</vh></v>
@@ -61,7 +69,6 @@
 <v t="ekr.20170719102447.35"><vh>check_at_doc</vh></v>
 <v t="ekr.20170719102447.36"><vh>check_at_code</vh></v>
 <v t="vitalije.20170721131019.1"><vh>strip_end_delimiter</vh></v>
-</v>
 </v>
 <v t="ekr.20170719102447.38"><vh>end_of_node</vh>
 <v t="vitalije.20170721180227.1"><vh>end_of_node_in_all</vh></v>
@@ -335,21 +342,12 @@ def at_adder(it):
     a = analytics; delim_st = a.delim_st
 
     in_doc = False
+    verbatim = delim_st + '@verbatim'
+    in_verbatim = False
 
     for line in body_raw_lines_of_node(gnx, analytics):
-
-        atdoc, line = check_at_doc(line, delim_st)
-        if atdoc:
-            yield line
-            in_doc = True
-            continue
-
-        atcode, line = check_at_code(line, delim_st)
-        if atcode:
-            yield line
-            in_doc = False
-            continue
-
+        @others
+        # or ordinary lines
         if in_doc:
             if not line.startswith(delim_st):
                 yield line
@@ -365,7 +363,9 @@ def at_adder(it):
     i  = st + 1 # line after at+node
     # is node inside at-all directive?
     all_ij= find_all(i, a.atall)
-
+    in_raw = False
+    atraw_st = a.delim_st + '@@raw' + a.delim_en
+    atraw_end = a.delim_st + '@@raw_end' + a.delim_en
     while i &lt; node_end:
         @others
 </t>
@@ -396,6 +396,7 @@ def at_adder(it):
     leo_end = delim_st + '@-leo'
 
     for line in body_lines_of_node(gnx, analytics):
+
         if line.startswith(leo_end):
             continue # skip end of file sentinel
         elif line.startswith('@first'):
@@ -1619,7 +1620,10 @@ The only file that new reading code still can't read is activeUnitTests.txt
 located in leo/test/ directory. This file contains some at-raw, and 
 at-asis directives that are still not recognizable by new reading code.
 
-</t>
+.. now 21-07-2017 21:09:51
+
+Finally, even leo/test/activeUnitTests.txt are successfully read by new code.
+Now all 401 valid derived file can be read the same way as with the old code.</t>
 <t tx="vitalije.20170720214636.1"></t>
 <t tx="vitalije.20170721074235.1">This file contains scripts that test how fast can be calculated
 line number in external file for any given line in at-anyfile
@@ -1898,7 +1902,7 @@ def strip_end_delimiter(line, delim_st):
     yield flines[i][1]
     i += 1</t>
 <t tx="vitalije.20170721192602.1">elif i + 1 in verbatims:
-    # skip verbatim sentinel
+    yield flines[i][1]
     i += 1</t>
 <t tx="vitalije.20170721192639.1">elif all_ij and i == all_ij[0]:
     # we are on the beginning of at-all block
@@ -1922,9 +1926,10 @@ def strip_end_delimiter(line, delim_st):
     # we are at the beginning of node
     gnx2 = a.nstart[i]
     en = end_of_node(gnx2, analytics)
-    i = en</t>
+    i = en
+    in_raw = False</t>
 <t tx="vitalije.20170721192819.1">elif i in a.oend:
-    # nothing to do if we are at the end of at-others
+    in_raw = False
     break</t>
 <t tx="vitalije.20170721192855.1">else:
     line = flines[i][1]
@@ -1981,8 +1986,9 @@ oth_ends = set(x[0] for x in at_oth_data.values())</t>
             s = ''.join(body_lines_of_node(gnx, analytics))
         if v.b != s:
             g.es('\n',v.h)
+            g.es(v.gnx)
             g.es(s)
-            p1 = c.find_h(v.h)[0]
+            p1 = next((x for x in c.find_h(v.h) if x.v is v), None)
             c.redraw(p1)
             return False
         # if i % 35 == 34:
@@ -1992,12 +1998,43 @@ oth_ends = set(x[0] for x in at_oth_data.values())</t>
     return True</t>
 <t tx="vitalije.20170721201605.1">def compare_reading_all_files():
     for i, fn in valid_files():
-        if i == 395: continue
         # for faster testing only few files are tested
         # comment following line to test all files
-        if i not in (32, 160, 180, 401):continue
+        #if i not in (32, 160, 180, 395, 401):continue
         if not run_experiment(compare_reading_file, i, False):
             g.es('file number:', i)
             break</t>
+<t tx="vitalije.20170721202706.1">elif in_raw:
+    line = flines[i][1]
+    if line.startswith(atraw_end):
+        in_raw = False
+    yield line
+    i += 1</t>
+<t tx="vitalije.20170721203441.1">elif flines[i][1][len(a.delim_st)+1:].startswith(atraw_end):
+    in_raw = True
+    yield line
+    i += 1</t>
+<t tx="vitalije.20170721204227.1">elif all_ij and all_ij[0] &lt; i &lt; all_ij[1]:
+    # at-others and sections are not processed
+    line = flines[i]
+    i += 1
+    yield line</t>
+<t tx="vitalije.20170721210632.1">if in_verbatim:
+    yield line
+    in_verbatim = False
+    continue</t>
+<t tx="vitalije.20170721210647.1">if line.startswith(verbatim):
+    in_verbatim = True
+    continue</t>
+<t tx="vitalije.20170721210702.1">atdoc, line = check_at_doc(line, delim_st)
+if atdoc:
+    yield line
+    in_doc = True
+    continue</t>
+<t tx="vitalije.20170721210713.1">atcode, line = check_at_code(line, delim_st)
+if atcode:
+    yield line
+    in_doc = False
+    continue</t>
 </tnodes>
 </leo_file>
