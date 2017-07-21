@@ -32,12 +32,12 @@
 </v>
 <v t="ekr.20170719102447.28"><vh>Read</vh>
 <v t="vitalije.20170721090105.1"><vh>patterns</vh></v>
+<v t="vitalije.20170721184930.1"><vh>get_patterns</vh></v>
 <v t="ekr.20170719102447.29"><vh>node_start_lines</vh>
 <v t="ekr.20170719102447.30"><vh>at_node_start</vh></v>
 </v>
 <v t="vitalije.20170721090017.1"><vh>sect_refs</vh>
 <v t="vitalije.20170721090011.1"><vh>at_sect_ref</vh></v>
-<v t="vitalije.20170721090021.1"><vh>sect_refs_with_pattern</vh></v>
 </v>
 <v t="ekr.20170719102447.32"><vh>at_others_refs</vh>
 <v t="vitalije.20170721091325.1"><vh>match_at_others</vh></v>
@@ -45,19 +45,37 @@
 <v t="vitalije.20170721095723.1"><vh>at_all_refs</vh>
 <v t="vitalije.20170721095723.3"><vh>match_at_all</vh></v>
 </v>
+<v t="vitalije.20170721193719.1"><vh>body lines ...</vh>
+<v t="ekr.20170719102447.37"><vh>body_lines_of_top_node</vh></v>
 <v t="ekr.20170719102447.33"><vh>body_lines_of_node</vh>
-<v t="ekr.20170719102447.34"><vh>body_raw_lines_of_node</vh></v>
+<v t="ekr.20170719102447.34"><vh>body_raw_lines_of_node</vh>
+<v t="vitalije.20170721192544.1"><vh>if in verbatims</vh></v>
+<v t="vitalije.20170721192602.1"><vh>elif at verbatim sentinel</vh></v>
+<v t="vitalije.20170721192639.1"><vh>elif at-all starts</vh></v>
+<v t="vitalije.20170721192649.1"><vh>elif at-others starts</vh></v>
+<v t="vitalije.20170721192800.1"><vh>elif section starts</vh></v>
+<v t="vitalije.20170721192809.1"><vh>elif node starts</vh></v>
+<v t="vitalije.20170721192819.1"><vh>elif at-others end</vh></v>
+<v t="vitalije.20170721192855.1"><vh>else ordinary line</vh></v>
+</v>
 <v t="ekr.20170719102447.35"><vh>check_at_doc</vh></v>
 <v t="ekr.20170719102447.36"><vh>check_at_code</vh></v>
 <v t="vitalije.20170721131019.1"><vh>strip_end_delimiter</vh></v>
-<v t="ekr.20170719102447.37"><vh>body_lines_of_top_node</vh></v>
+</v>
 </v>
 <v t="ekr.20170719102447.38"><vh>end_of_node</vh>
 <v t="vitalije.20170721180227.1"><vh>end_of_node_in_all</vh></v>
 <v t="vitalije.20170721180649.1"><vh>end_of_node_in_others</vh></v>
 </v>
-<v t="vitalije.20170721184930.1"><vh>get_patterns</vh></v>
-<v t="ekr.20170719102447.39"><vh>analyze_lines</vh></v>
+<v t="ekr.20170719102447.39"><vh>analyze_lines</vh>
+<v t="vitalije.20170721194006.1"><vh>header of derived file</vh></v>
+<v t="vitalije.20170721194026.1"><vh>verbatims</vh></v>
+<v t="vitalije.20170721194127.1"><vh>data for further analysis</vh></v>
+<v t="vitalije.20170721194142.1"><vh>at_all data</vh></v>
+<v t="vitalije.20170721194157.1"><vh>nodes data</vh></v>
+<v t="vitalije.20170721194206.1"><vh>sections data</vh></v>
+<v t="vitalije.20170721194213.1"><vh>at_others data</vh></v>
+</v>
 <v t="vitalije.20170721100524.1"><vh>find_all</vh></v>
 <v t="vitalije.20170721100518.1"><vh>read_verbatims</vh></v>
 <v t="ekr.20170719102447.40"><vh>children_gnxes</vh></v>
@@ -65,7 +83,6 @@
 <v t="ekr.20170719102447.42"><vh>read_at_first_lines</vh></v>
 <v t="vitalije.20170721173437.1"><vh>read_at_last_lines</vh></v>
 <v t="vitalije.20170721083818.1"><vh>read_header</vh></v>
-<v t="vitalije.20170721174314.1"><vh>indent</vh></v>
 </v>
 <v t="ekr.20170719102447.10"><vh>Write</vh>
 <v t="ekr.20170719102447.11"><vh>starting_pos</vh></v>
@@ -98,10 +115,15 @@
 <v t="vitalije.20170721074430.1"><vh>exp-4 dev @key=Alt-4</vh>
 <v t="vitalije.20170721075016.1"><vh>cloned</vh>
 <v t="vitalije.20170720214432.1"></v>
+<v t="vitalije.20170721190334.1"><vh>Utils</vh>
+<v t="vitalije.20170721174314.1"><vh>indent</vh></v>
+</v>
 <v t="ekr.20170719102447.28"></v>
 <v t="ekr.20170719102447.10"></v>
 </v>
 <v t="vitalije.20170721075007.1"><vh>run_experiment</vh></v>
+<v t="vitalije.20170721201600.1"><vh>compare_reading_file</vh></v>
+<v t="vitalije.20170721201605.1"><vh>compare_reading_all_files</vh></v>
 </v>
 <v t="vitalije.20170720214636.1"><vh>EXTERNALS</vh></v>
 </vnodes>
@@ -270,6 +292,7 @@ def at_adder(it):
 
     for i, line in flines:
         if i in verbatims: continue
+
         m = at_node_start(i, line, pat)
         if m:
             yield m
@@ -294,31 +317,39 @@ def at_adder(it):
     flines, ptrns, verbatims = data
     pat = ptrns.others
     starts = []
+
     for i, line in flines:
+
         if i in verbatims: continue
+
         m = match_at_others(i, line, pat)
-        if not m: continue
-        if m[2]:
+
+        if m and m[2]:
             starts.append(m)
-        else:
+        elif m:
             j, indent, junk = starts.pop()
             yield j, i, indent
 
 </t>
 <t tx="ekr.20170719102447.33">def body_lines_of_node(gnx, analytics):
     a = analytics; delim_st = a.delim_st
+
     in_doc = False
-    for line in body_raw_lines_of_node(gnx, a):
+
+    for line in body_raw_lines_of_node(gnx, analytics):
+
         atdoc, line = check_at_doc(line, delim_st)
         if atdoc:
             yield line
             in_doc = True
             continue
+
         atcode, line = check_at_code(line, delim_st)
         if atcode:
             yield line
             in_doc = False
             continue
+
         if in_doc:
             if not line.startswith(delim_st):
                 yield line
@@ -331,60 +362,25 @@ def at_adder(it):
     a = analytics; flines = a.flines; verbatims = a.verbatims
     st, lev, h, ind = a.nodes[gnx][0]
     node_end = end_of_node(gnx, analytics)
-    i  = st + 1
+    i  = st + 1 # line after at+node
+    # is node inside at-all directive?
     all_ij= find_all(i, a.atall)
+
     while i &lt; node_end:
-        if i in verbatims:
-            yield flines[i][1]
-            i += 1
-        elif i + 1 in verbatims:
-            i += 1
-        elif all_ij and i == all_ij[0]:
-            i = all_ij[1] + 1
-            yield all_ij[2][ind:] + '@all\n'
-            all_ij = find_all(i, a.atall)
-        elif i in a.othrs:
-            en, wsp = a.othrs[i]
-            i = en + 1
-            yield indent(wsp - ind, '@others\n')
-        elif i in a.sects:
-            en, wsp, sref, after = a.sects[i]
-            i = en + 1
-            nl = '' if after.endswith('\n') else '\n'
-            yield indent(wsp - ind, g.angleBrackets(sref) + after + nl)
-        elif i in a.nstart:
-            gnx2 = a.nstart[i]
-            en = end_of_node(gnx2, analytics)
-            if en &lt; 0:
-                break
-            i = en
-        elif i in a.oend:
-            break
-        else:
-            line = flines[i][1]
-            if len(line) &lt; ind:
-                yield line
-            else:
-                yield line[ind:]
-            i += 1</t>
+        @others
+</t>
 <t tx="ekr.20170719102447.35">def check_at_doc(line, delim_st):
     if line.startswith(delim_st):
         rl = line[len(delim_st):]
-        if rl == '@+at\n':
-            return True, '@\n'
-        elif rl.startswith('@+at '):
-            return True, '@ ' + rl[5:]
-        elif rl.startswith('@+doc '):
-            return True, '@doc ' + rl[6:]
-        elif rl == '@+doc\n':
-            return True, '@doc\n'
+        if rl.startswith(('@+at\n', '@+at ')):
+            return True, '@' + rl[4:]
+        elif rl.startswith(('@+doc ', '@+doc\n')):
+            return True, '@' + rl[2:]
     return False, line</t>
 <t tx="ekr.20170719102447.36">def check_at_code(line, delim_st):
     if line.startswith(delim_st):
         rl = line[len(delim_st):]
-        if rl == '@@c\n':
-            return True, rl[1:]
-        elif rl == '@@code\n':
+        if rl.startswith(('@@c\n', '@@code\n')):
             return True, rl[1:]
         elif rl.startswith('@@'):
             return False, strip_end_delimiter(rl[1:], delim_st)
@@ -393,17 +389,22 @@ def at_adder(it):
 </t>
 <t tx="ekr.20170719102447.37">def body_lines_of_top_node(gnx, analytics):
     a = analytics; delim_st = a.delim_st
+
     first_lines = list(read_at_first_lines(analytics))
     last_lines = list(read_at_last_lines(analytics))
+
     leo_end = delim_st + '@-leo'
+
     for line in body_lines_of_node(gnx, analytics):
         if line.startswith(leo_end):
-            continue
+            continue # skip end of file sentinel
         elif line.startswith('@first'):
             assert first_lines, repr(first_lines)
+            # insert first line
             yield line[:6] + ' ' + first_lines.pop(0)
         elif line.startswith('@last'):
             assert last_lines, repr(last_lines)
+            # insert last line
             yield line[:5] + ' ' + last_lines.pop(0)
         else:
             yield line</t>
@@ -412,39 +413,28 @@ def at_adder(it):
     a = analytics
 
     st, lev, h, ind = a.nodes[gnx][0]
+
     is_inside = lambda x:st &gt; x[0] and st &lt; x[1]
     in_all = next(filter(is_inside, a.atall),  False)
+
     if in_all:
         end_all = in_all[1]
         res = end_of_node_in_all(st, end_all, analytics)
+
     elif st - 1 in a.sects:
         # inside section node: end is at the end of section
         res = a.sects[st-1][0]
+
     else:
+        # not in all, not in section
+        # must be in at-others
         res = end_of_node_in_others(st, lev, analytics)
+
     return res
 </t>
-<t tx="ekr.20170719102447.39">    
-def analyze_lines(lines):
+<t tx="ekr.20170719102447.39">def analyze_lines(lines):
     flines = tuple(enumerate(lines))
-    head = read_header(flines)
-    if not head:
-        g.warning('no valid header. is this really derived file?')
-    ver, kind, delim_st, delim_en = head
-    verbatims = tuple(read_verbatims(flines, delim_st))
-    data = flines, get_patterns(delim_st), verbatims
-    at_all_data = tuple(at_all_refs(data))
-    node_data = {}
-    for i, ind, gnx, lev, h in node_start_lines(data):
-        t = node_data.get(gnx, tuple())
-        nd = (i, lev, h, len(ind))
-        node_data[gnx] = t + (nd,)
-    node_starts = dict((x[0], x[2]) for x in node_start_lines(data))
-    sect_data = dict((i, (j, len(ind), sref, after))
-        for i,j,ind,sref,after in sect_refs(data))
-    at_oth_data = dict((st, (en, len(ind)))
-        for st,en,ind in at_others_refs(data))
-    oth_ends = set(x[0] for x in at_oth_data.values())
+    @others
     return g.bunch(
             flines = flines,
             nodes = node_data,
@@ -461,8 +451,8 @@ def analyze_lines(lines):
 <t tx="ekr.20170719102447.40">def children_gnxes(gnx, analytics):
     a = analytics; node_data = a.nodes
     st, level, h, wsp = node_data.get(gnx)[0]
-    i = st + 1
-    tlevel = level + 1
+    i = st + 1 # start after at+node sentinel
+    tlevel = level + 1 # target level we are looking for
     while i &lt; len(flines):
         ignx = a.nstart.get(i)
         if ignx:
@@ -479,6 +469,7 @@ def analyze_lines(lines):
     a = analytics
     for i, line in a.flines:
         if leo_header_pat.match(line):
+            # first lines are only before at+leo
             break
         yield line
 </t>
@@ -1629,7 +1620,7 @@ located in leo/test/ directory. This file contains some at-raw, and
 at-asis directives that are still not recognizable by new reading code.
 
 </t>
-<t tx="vitalije.20170720214636.1">@path /media/vitalije/home11/vitalije/programi/leo-editor/trunk-sqlite/leo/plugins</t>
+<t tx="vitalije.20170720214636.1"></t>
 <t tx="vitalije.20170721074235.1">This file contains scripts that test how fast can be calculated
 line number in external file for any given line in at-anyfile
 subtree.
@@ -1663,34 +1654,10 @@ import pprint
 @others
 c.frame.log.selectTab('Log')
 c.frame.log.clearLog()
-def compare_reading_file(n, p):
-    analytics = analyze_lines(get_lines(n))
-    for i, p1 in enumerate(p.self_and_subtree()):
-        gnx = p1.gnx
-        v = c.fileCommands.gnxDict[gnx]
-        if i == 0:
-            s = ''.join(body_lines_of_top_node(gnx, analytics))
-        else:
-            s = ''.join(body_lines_of_node(gnx, analytics))
-        if v.b != s:
-            g.es('\n',v.h)
-            g.es(s)
-            p1 = c.find_h(v.h)[0]
-            c.redraw(p1)
-            return False
-        # if i % 35 == 34:
-        #     g.es('.')
-        # else:
-        #    g.es('.', newline=False)
-    return True
-def compare_reading_all_files():
-    for i, fn in valid_files():
-        if i == 395: continue
-        if not run_experiment(compare_reading_file, i, False):
-            g.es('file number:', i)
-            break
 compare_reading_all_files()
+
 g.es(len(tuple(valid_files())) - 1, 'files successfully read')
+
 clear_gnxDict()
 c.redraw()</t>
 <t tx="vitalije.20170721075007.1">def run_experiment(func, n, keep_node=False):
@@ -1740,19 +1707,23 @@ def read_header(flines):
 <t tx="vitalije.20170721090017.1">def sect_refs(data):
     flines, ptrns, verbatims = data
     pat = ptrns.section
-    return sect_refs_with_pattern(flines, pat, verbatims)</t>
-<t tx="vitalije.20170721090021.1">def sect_refs_with_pattern(flines, pat, verbatims):
-    starts = {}
+
+    starts = []
+
     for i, line in flines:
+
         if i in verbatims: continue
+
         m = at_sect_ref(i, line, pat)
         if not m: continue
+
         j, indent, sref, is_start, after = m
-        if is_start: # is_start
-            starts[sref] = m
+
+        if is_start:
+            starts.append(m)
         else:
-            mst = starts.get(sref, m)
-            j, indent, sref, is_start, after = mst
+            m_st = starts.pop()
+            j, indent, sref, is_start, after = m_st
             yield (j, i, indent, sref, after)</t>
 <t tx="vitalije.20170721090105.1">patterns = {
     '#': g.bunch(
@@ -1829,14 +1800,18 @@ def read_header(flines):
 <t tx="vitalije.20170721095723.1">def at_all_refs(data):
     flines, ptrns, verbatims = data
     pat = ptrns.all
+
     starts = []
+
     for i, line in flines:
+
         if i in verbatims: continue
+
         m = match_at_all(i, line, pat)
-        if not m: continue
-        if m[2]:
+
+        if m and m[2]:
             starts.append(m)
-        else:
+        elif m:
             j, indent, junk = starts.pop()
             yield j, i, indent
 </t>
@@ -1856,30 +1831,40 @@ def read_header(flines):
         else:
             in_verb = line.startswith(st)</t>
 <t tx="vitalije.20170721100524.1">def find_all(n, at_all_data):
+    '''Returns at-all block starting on line n, or
+       first following block. If such block can't
+       be found, returns None.'''
+
+    # Note: at-all blocks can't be nested nor they can overlap
+    #       and at_all_data is in ascending order
     for i, j, ws in at_all_data:
-        if i == n: return i, j, ws
         if i &lt; n: continue
         return i, j, ws
+
 </t>
-<t tx="vitalije.20170721131019.1">def strip_end_delimiter(line, delim_st):
+<t tx="vitalije.20170721131019.1">end_delimiters = {
+    '&lt;!--': '-''-&gt;',
+    '/*': '*''/'
+}
+def strip_end_delimiter(line, delim_st):
     delim_en = end_delimiters.get(delim_st)
     if delim_en:
         i = line.rfind(delim_en)
         if i &gt; -1:
             return line[:i] + line[i + len(delim_en):]
-    return line
-end_delimiters = {
-    '&lt;!--': '-''-&gt;',
-    '/*': '*''/'
-}</t>
+    return line</t>
 <t tx="vitalije.20170721173437.1">def read_at_last_lines(analytics):
     a = analytics; flines = a.flines
     leo_end = a.delim_st + '@-leo'
     j, line = flines[-1]
     while j &gt; 0:
-        if line.startswith(leo_end) :
+        if line.startswith(leo_end):
+            # last lines comes after at-leo sentinel line
             break
+        # going backword from the end of file
         j, line = flines[j - 1]
+
+    # in j is index of at-leo sentinel line
     for i, line in flines[j+1:]:
         yield line</t>
 <t tx="vitalije.20170721174314.1">def indent(n, s):
@@ -1907,5 +1892,112 @@ end_delimiters = {
     if not ptrns:
         g.error('no valid patterns for delimiter: %r'%delim_st)
     return ptrns</t>
+<t tx="vitalije.20170721190334.1"></t>
+<t tx="vitalije.20170721192544.1">if i in verbatims:
+    # verbatim line: yield it as it is
+    yield flines[i][1]
+    i += 1</t>
+<t tx="vitalije.20170721192602.1">elif i + 1 in verbatims:
+    # skip verbatim sentinel
+    i += 1</t>
+<t tx="vitalije.20170721192639.1">elif all_ij and i == all_ij[0]:
+    # we are on the beginning of at-all block
+    i = all_ij[1] + 1 # after at-all block
+    yield all_ij[2][ind:] + '@all\n'
+    # find next at-all block
+    all_ij = find_all(i, a.atall)</t>
+<t tx="vitalije.20170721192649.1">elif i in a.othrs:
+    # we are on the beginning of at-others block
+    en, wsp = a.othrs[i]
+    i = en + 1 # after at-others block
+    yield indent(wsp - ind, '@others\n')</t>
+<t tx="vitalije.20170721192800.1">elif i in a.sects:
+    # we are on the beginning of section block
+    en, wsp, sref, after = a.sects[i]
+    i = en + 1 # after section block
+    # if there was delim_end, the newline was striped
+    nl = '' if after.endswith('\n') else '\n'
+    yield indent(wsp - ind, g.angleBrackets(sref) + after + nl)</t>
+<t tx="vitalije.20170721192809.1">elif i in a.nstart:
+    # we are at the beginning of node
+    gnx2 = a.nstart[i]
+    en = end_of_node(gnx2, analytics)
+    i = en</t>
+<t tx="vitalije.20170721192819.1">elif i in a.oend:
+    # nothing to do if we are at the end of at-others
+    break</t>
+<t tx="vitalije.20170721192855.1">else:
+    line = flines[i][1]
+    if len(line) &lt; ind:
+        # perhaps line was empty and we are at some indent
+        # using line[ind:] would strip newline
+        yield line
+    else:
+        yield line[ind:]
+    i += 1</t>
+<t tx="vitalije.20170721193719.1"></t>
+<t tx="vitalije.20170721194006.1">head = read_header(flines)
+if not head:
+    g.warning('no valid header. is this really derived file?')
+ver, kind, delim_st, delim_en = head</t>
+<t tx="vitalije.20170721194026.1">verbatims = tuple(read_verbatims(flines, delim_st))</t>
+<t tx="vitalije.20170721194127.1">data = flines, get_patterns(delim_st), verbatims</t>
+<t tx="vitalije.20170721194142.1">at_all_data = tuple(at_all_refs(data))</t>
+<t tx="vitalije.20170721194157.1">@ in at-all files there are multiple at+node sentinels
+  with the same gnx for cloned nodes. So node_data must
+  contain tuple of node data tuples for any gnx.
+@c
+
+node_data = {}
+for i, ind, gnx, lev, h in node_start_lines(data):
+    t = node_data.get(gnx, tuple()) # previous or new empty tuple
+    nd = (i, lev, h, len(ind)) # tuple of node data (for one instance of node)
+    node_data[gnx] = t + (nd,) #  add this data to tuple for this gnx
+
+# node_starts: keys are indexes of starting line, values are gnxes
+node_starts = dict((x[0], x[2]) for x in node_start_lines(data))</t>
+<t tx="vitalije.20170721194206.1"># sect_refs yields tuples of the following form:
+#
+#      start, end, ident_str, reference name and after reference text
+#       0   |  1   |   2     |          3     |           4          |
+#
+sdata_fun = lambda x:(x[1], len(x[2]), x[3], x[4])
+
+# key is start, value is (end, len(ident), ref, afterref)
+sect_data = dict((x[0], sdata_fun(x)) for x in sect_refs(data))</t>
+<t tx="vitalije.20170721194213.1"># keys are index of start line, values are tuples of (end, len(indent))
+at_oth_data = dict((st, (en, len(ind))) for st,en,ind in at_others_refs(data))
+
+# ending line indexes for at-others sentinels
+oth_ends = set(x[0] for x in at_oth_data.values())</t>
+<t tx="vitalije.20170721201600.1">def compare_reading_file(n, p):
+    analytics = analyze_lines(get_lines(n))
+    for i, p1 in enumerate(p.self_and_subtree()):
+        gnx = p1.gnx
+        v = c.fileCommands.gnxDict[gnx]
+        if i == 0:
+            s = ''.join(body_lines_of_top_node(gnx, analytics))
+        else:
+            s = ''.join(body_lines_of_node(gnx, analytics))
+        if v.b != s:
+            g.es('\n',v.h)
+            g.es(s)
+            p1 = c.find_h(v.h)[0]
+            c.redraw(p1)
+            return False
+        # if i % 35 == 34:
+        #     g.es('.')
+        # else:
+        #     g.es('.', newline=False)
+    return True</t>
+<t tx="vitalije.20170721201605.1">def compare_reading_all_files():
+    for i, fn in valid_files():
+        if i == 395: continue
+        # for faster testing only few files are tested
+        # comment following line to test all files
+        if i not in (32, 160, 180, 401):continue
+        if not run_experiment(compare_reading_file, i, False):
+            g.es('file number:', i)
+            break</t>
 </tnodes>
 </leo_file>
