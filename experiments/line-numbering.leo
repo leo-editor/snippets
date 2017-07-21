@@ -31,24 +31,19 @@
 <v t="vitalije.20170720214432.14"><vh>test_1</vh></v>
 </v>
 <v t="ekr.20170719102447.28"><vh>Read</vh>
+<v t="vitalije.20170721090105.1"><vh>patterns</vh></v>
 <v t="ekr.20170719102447.29"><vh>node_start_lines</vh>
-<v t="vitalije.20170721090105.1"><vh>node_start_patterns</vh></v>
 <v t="ekr.20170719102447.30"><vh>at_node_start</vh></v>
 </v>
 <v t="vitalije.20170721090017.1"><vh>sect_refs</vh>
-<v t="vitalije.20170721085926.1"><vh>at_section_patterns</vh></v>
 <v t="vitalije.20170721090011.1"><vh>at_sect_ref</vh></v>
 <v t="vitalije.20170721090021.1"><vh>sect_refs_with_pattern</vh></v>
 </v>
 <v t="ekr.20170719102447.32"><vh>at_others_refs</vh>
-<v t="vitalije.20170721091318.1"><vh>at_others_with_pattern</vh></v>
 <v t="vitalije.20170721091325.1"><vh>match_at_others</vh></v>
-<v t="vitalije.20170721091336.1"><vh>at_others_patterns</vh></v>
 </v>
 <v t="vitalije.20170721095723.1"><vh>at_all_refs</vh>
-<v t="vitalije.20170721095723.2"><vh>at_all_with_pattern</vh></v>
 <v t="vitalije.20170721095723.3"><vh>match_at_all</vh></v>
-<v t="vitalije.20170721095723.4"><vh>at_all_patterns</vh></v>
 </v>
 <v t="ekr.20170719102447.33"><vh>body_lines_of_node</vh>
 <v t="ekr.20170719102447.34"><vh>body_raw_lines_of_node</vh></v>
@@ -57,14 +52,20 @@
 <v t="vitalije.20170721131019.1"><vh>strip_end_delimiter</vh></v>
 <v t="ekr.20170719102447.37"><vh>body_lines_of_top_node</vh></v>
 </v>
-<v t="ekr.20170719102447.38"><vh>end_of_node</vh></v>
+<v t="ekr.20170719102447.38"><vh>end_of_node</vh>
+<v t="vitalije.20170721180227.1"><vh>end_of_node_in_all</vh></v>
+<v t="vitalije.20170721180649.1"><vh>end_of_node_in_others</vh></v>
+</v>
+<v t="vitalije.20170721184930.1"><vh>get_patterns</vh></v>
 <v t="ekr.20170719102447.39"><vh>analyze_lines</vh></v>
 <v t="vitalije.20170721100524.1"><vh>find_all</vh></v>
 <v t="vitalije.20170721100518.1"><vh>read_verbatims</vh></v>
 <v t="ekr.20170719102447.40"><vh>children_gnxes</vh></v>
 <v t="ekr.20170719102447.41"><vh>gnx2headline</vh></v>
 <v t="ekr.20170719102447.42"><vh>read_at_first_lines</vh></v>
+<v t="vitalije.20170721173437.1"><vh>read_at_last_lines</vh></v>
 <v t="vitalije.20170721083818.1"><vh>read_header</vh></v>
+<v t="vitalije.20170721174314.1"><vh>indent</vh></v>
 </v>
 <v t="ekr.20170719102447.10"><vh>Write</vh>
 <v t="ekr.20170719102447.11"><vh>starting_pos</vh></v>
@@ -264,16 +265,14 @@ def at_adder(it):
             yield p, w</t>
 <t tx="ekr.20170719102447.28"></t>
 <t tx="ekr.20170719102447.29">def node_start_lines(data):
-    flines, delim_st, delim_en, verbatims = data
-    pat = node_start_patterns.get(delim_st)
-    if not pat:
-        g.warning('no pattern for start node search and delim[%s]'%delim_st)
-    else:
-        for i, line in flines:
-            if i in verbatims: continue
-            m = at_node_start(i, line, pat)
-            if m:
-                yield m
+    flines, ptrns, verbatims = data
+    pat = ptrns.node_start
+
+    for i, line in flines:
+        if i in verbatims: continue
+        m = at_node_start(i, line, pat)
+        if m:
+            yield m
 </t>
 <t tx="ekr.20170719102447.30">def at_node_start(i, line, pat):
     m = pat.match(line)
@@ -292,18 +291,24 @@ def at_adder(it):
     else:
         return False</t>
 <t tx="ekr.20170719102447.32">def at_others_refs(data):
-    flines, delim_st, delim_en, verbatims = data
-    pat = at_others_patterns.get(delim_st)
-    if not pat:
-        g.warning('no pattern for at others search and delim[%s]'%delim_st)
-    else:
-        return at_others_with_pattern(flines, pat, verbatims)
+    flines, ptrns, verbatims = data
+    pat = ptrns.others
+    starts = []
+    for i, line in flines:
+        if i in verbatims: continue
+        m = match_at_others(i, line, pat)
+        if not m: continue
+        if m[2]:
+            starts.append(m)
+        else:
+            j, indent, junk = starts.pop()
+            yield j, i, indent
+
 </t>
 <t tx="ekr.20170719102447.33">def body_lines_of_node(gnx, analytics):
+    a = analytics; delim_st = a.delim_st
     in_doc = False
-    delim_st = analytics[6]
-    d_skip = len(delim_st)
-    for line in body_raw_lines_of_node(gnx, analytics):
+    for line in body_raw_lines_of_node(gnx, a):
         atdoc, line = check_at_doc(line, delim_st)
         if atdoc:
             yield line
@@ -318,24 +323,17 @@ def at_adder(it):
             if not line.startswith(delim_st):
                 yield line
             else:
-                yield line[d_skip+1:]
+                yield line[len(delim_st)+1:]
         else:
             yield line
 </t>
 <t tx="ekr.20170719102447.34">def body_raw_lines_of_node(gnx, analytics):
-    (flines, node_data, node_starts, sect_data, at_oth_data, 
-        oth_ends, delim_st, verbatims, at_all_data) = analytics
-    st, lev, h, ind = node_data[gnx][0]
+    a = analytics; flines = a.flines; verbatims = a.verbatims
+    st, lev, h, ind = a.nodes[gnx][0]
     node_end = end_of_node(gnx, analytics)
-    trace = 'ekr.20161117164321.110' == gnx
-    if trace:
-        g.trace('node_end', node_end, flines[node_end][1][:-1])
-    if node_end &lt; 0:
-        node_end = len(flines)
     i  = st + 1
-    all_ij= find_all(i, at_all_data)
+    all_ij= find_all(i, a.atall)
     while i &lt; node_end:
-        if trace:g.trace(i, flines[i][1].rstrip())
         if i in verbatims:
             yield flines[i][1]
             i += 1
@@ -343,24 +341,24 @@ def at_adder(it):
             i += 1
         elif all_ij and i == all_ij[0]:
             i = all_ij[1] + 1
-            yield all_ij[2][ind:] + ('@' 'all\n')
-            all_ij = find_all(i, at_all_data)
-        elif i in at_oth_data:
-            en, wsp = at_oth_data[i]
+            yield all_ij[2][ind:] + '@all\n'
+            all_ij = find_all(i, a.atall)
+        elif i in a.othrs:
+            en, wsp = a.othrs[i]
             i = en + 1
-            yield ' '*(wsp - ind) + ('@''others\n')
-        elif i in sect_data:
-            en, wsp, sref, after = sect_data[i]
+            yield indent(wsp - ind, '@others\n')
+        elif i in a.sects:
+            en, wsp, sref, after = a.sects[i]
             i = en + 1
             nl = '' if after.endswith('\n') else '\n'
-            yield ' '*(wsp - ind) + g.angleBrackets(sref) + after + nl
-        elif i in node_starts:
-            gnx2 = node_starts[i]
+            yield indent(wsp - ind, g.angleBrackets(sref) + after + nl)
+        elif i in a.nstart:
+            gnx2 = a.nstart[i]
             en = end_of_node(gnx2, analytics)
             if en &lt; 0:
                 break
             i = en
-        elif i in oth_ends:
+        elif i in a.oend:
             break
         else:
             line = flines[i][1]
@@ -394,47 +392,47 @@ def at_adder(it):
 
 </t>
 <t tx="ekr.20170719102447.37">def body_lines_of_top_node(gnx, analytics):
+    a = analytics; delim_st = a.delim_st
     first_lines = list(read_at_first_lines(analytics))
     last_lines = list(read_at_last_lines(analytics))
-    leo_end = analytics[6] + ('@' '-' 'leo')
+    leo_end = delim_st + '@-leo'
     for line in body_lines_of_node(gnx, analytics):
         if line.startswith(leo_end):
             continue
-        elif line.startswith('@' 'first'):
+        elif line.startswith('@first'):
             assert first_lines, repr(first_lines)
             yield line[:6] + ' ' + first_lines.pop(0)
-        elif line.startswith('@' 'last'):
+        elif line.startswith('@last'):
             assert last_lines, repr(last_lines)
             yield line[:5] + ' ' + last_lines.pop(0)
         else:
             yield line</t>
 <t tx="ekr.20170719102447.38">def end_of_node(gnx, analytics):
 
-    (flines, node_data, node_starts, sect_data, at_oth_data, 
-        oth_ends, delim_st, verbatims, at_all_data) = analytics
+    a = analytics
 
-    st, lev, h, ind = node_data[gnx][0]
-    in_all = next(filter(lambda x:st &gt; x[0] and st &lt; x[1], at_all_data), False)
+    st, lev, h, ind = a.nodes[gnx][0]
+    is_inside = lambda x:st &gt; x[0] and st &lt; x[1]
+    in_all = next(filter(is_inside, a.atall),  False)
     if in_all:
-        i = min(filter(lambda x: x &gt; st, node_starts.keys()),
-                default=in_all[1])
-        return i
-    elif st - 1 in sect_data:
-        return sect_data[st-1][0]
-    res = len(flines)
-    for gnx, nd in node_data.items():
-        for (i, lev2, h2, wsp) in nd:
-            if lev2 &lt;= lev and i &gt; st:
-                res = min(res, i)
-    return res</t>
-<t tx="ekr.20170719102447.39">def analyze_lines(lines):
+        end_all = in_all[1]
+        res = end_of_node_in_all(st, end_all, analytics)
+    elif st - 1 in a.sects:
+        # inside section node: end is at the end of section
+        res = a.sects[st-1][0]
+    else:
+        res = end_of_node_in_others(st, lev, analytics)
+    return res
+</t>
+<t tx="ekr.20170719102447.39">    
+def analyze_lines(lines):
     flines = tuple(enumerate(lines))
     head = read_header(flines)
     if not head:
         g.warning('no valid header. is this really derived file?')
     ver, kind, delim_st, delim_en = head
     verbatims = tuple(read_verbatims(flines, delim_st))
-    data = flines, delim_st, delim_en, verbatims
+    data = flines, get_patterns(delim_st), verbatims
     at_all_data = tuple(at_all_refs(data))
     node_data = {}
     for i, ind, gnx, lev, h in node_start_lines(data):
@@ -447,18 +445,26 @@ def at_adder(it):
     at_oth_data = dict((st, (en, len(ind)))
         for st,en,ind in at_others_refs(data))
     oth_ends = set(x[0] for x in at_oth_data.values())
-    return (flines, node_data, node_starts, sect_data, 
-            at_oth_data, oth_ends, delim_st, verbatims,
-            at_all_data)
+    return g.bunch(
+            flines = flines,
+            nodes = node_data,
+            nstart = node_starts,
+            sects = sect_data,
+            othrs = at_oth_data,
+            oend = oth_ends,
+            delim_st = delim_st,
+            delim_en = delim_en,
+            verbatims = verbatims,
+            atall = at_all_data,)
 
 </t>
 <t tx="ekr.20170719102447.40">def children_gnxes(gnx, analytics):
-    flines, node_data, node_starts, sect_data, at_oth_data, oth_ends, delim_st = analytics
+    a = analytics; node_data = a.nodes
     st, level, h, wsp = node_data.get(gnx)[0]
     i = st + 1
     tlevel = level + 1
     while i &lt; len(flines):
-        ignx = node_starts.get(i)
+        ignx = a.nstart.get(i)
         if ignx:
             ilev = node_data.get(ignx)[0][1]
             if ilev == tlevel:
@@ -467,25 +473,15 @@ def at_adder(it):
                 break
         i += 1</t>
 <t tx="ekr.20170719102447.41">def gnx2headline(gnx, analytics):
-    node_data = analytics[1]
-    return node_data[gnx][0][2]</t>
+    a = analytics
+    return a.nodes[gnx][0][2]</t>
 <t tx="ekr.20170719102447.42">def read_at_first_lines(analytics):
-    flines = analytics[0]
-    for i, line in flines:
+    a = analytics
+    for i, line in a.flines:
         if leo_header_pat.match(line):
             break
         yield line
-def read_at_last_lines(analytics):
-    (flines, node_data, node_starts, sect_data, at_oth_data,
-        oth_ends, delim_st, verbatims, at_all_data) = analytics
-    leo_end = delim_st + '@-leo'
-    j, line = flines[-1]
-    while j &gt; 0:
-        if line.startswith(leo_end) :
-            break
-        j, line = flines[j - 1]
-    for i, line in flines[j+1:]:
-        yield line</t>
+</t>
 <t tx="vitalije.20170720180020.1">import itertools
 import re
 import leo.core.leoNodes as leoNodes
@@ -661,7 +657,8 @@ def do_import_file(j):
     p2.h = hfi
     gnx = p2.gnx
     pth = c.getNodeFileName(p2)
-    assert pth == fn, '%d \n%s !=\n%s\n%s'%(j, pth, fn, hfi)
+    fn2 = fn.replace('/', '\\')
+    assert pth in (fn, fn2), '%d \n%s !=\n%s\n%s'%(j, pth, fn, hfi)
     ok = c.atFileCommands.read(p2, force=True)
     gnx2 = p2.gnx
     if gnx != gnx2:
@@ -1583,10 +1580,8 @@ def get_file(n):
 <t tx="vitalije.20170720214432.8">def headline_for_ideal_import(j):
     flines = enumerate(get_lines(j))
     ver, kind, delim_st, delim_en = read_header(flines)
-    pat = node_start_patterns.get(delim_st)
-    if not pat:
-        g.warning('no pattern for start node search and delim[%s]'%delim_st)
-        return
+    ptrns = get_patterns(delim_st)
+    pat = ptrns.node_start
     for i, line in flines:
         m = at_node_start(i, line, pat)
         if not m: continue
@@ -1634,7 +1629,7 @@ located in leo/test/ directory. This file contains some at-raw, and
 at-asis directives that are still not recognizable by new reading code.
 
 </t>
-<t tx="vitalije.20170720214636.1"></t>
+<t tx="vitalije.20170720214636.1">@path /media/vitalije/home11/vitalije/programi/leo-editor/trunk-sqlite/leo/plugins</t>
 <t tx="vitalije.20170721074235.1">This file contains scripts that test how fast can be calculated
 line number in external file for any given line in at-anyfile
 subtree.
@@ -1732,16 +1727,6 @@ def read_header(flines):
                     m.group(1), # delim_start
                     m.group(4), # delim_end
                 )</t>
-<t tx="vitalije.20170721085926.1">at_section_patterns = {
-   '#':    re.compile('^(\\s*)#@([+]|-)&lt;{2}(.+?)&gt;{2}(.*)$', re.DOTALL),
-   '.. ':  re.compile('^(\\s*)[.][.] @([+]|-)&lt;{2}(.+?)&gt;{2}(.*)$', re.DOTALL),
-   '&lt;!--': re.compile('^(\\s*)&lt;!--@([+]|-)&lt;{2}(.+?)&gt;{2}--&gt;(.*?)$', re.DOTALL),
-   '/*':   re.compile('^(\\s*)/[*]@([+]|-)&lt;{2}(.+?)&gt;{2}[*]/(.*?)$', re.DOTALL),
-   '//':   re.compile('^(\\s*)//@([+]|-)&lt;{2}(.+?)&gt;{2}(.*)$', re.DOTALL),
-   ';' :   re.compile('^(\\s*);@([+]|-)&lt;{2}(.+?)&gt;{2}(.*)$', re.DOTALL),
-   'REM ': re.compile('^(\\s*)REM @([+]|-)&lt;{2}(.+?)&gt;{2}(.*)$', re.DOTALL),
-   '%': re.compile('^(\\s*)%@([+]|-)&lt;{2}(.+?)&gt;{2}(.*)$', re.DOTALL),
-}</t>
 <t tx="vitalije.20170721090011.1">def at_sect_ref(i, line, pat):
     m = pat.match(line)
     if m:
@@ -1753,10 +1738,8 @@ def read_header(flines):
     else:
         return False</t>
 <t tx="vitalije.20170721090017.1">def sect_refs(data):
-    flines, delim_st, delim_en, verbatims = data
-    pat = at_section_patterns.get(delim_st)
-    if not pat:
-        g.warning('no pattern for start section search and delim[%s]'%delim_st)
+    flines, ptrns, verbatims = data
+    pat = ptrns.section
     return sect_refs_with_pattern(flines, pat, verbatims)</t>
 <t tx="vitalije.20170721090021.1">def sect_refs_with_pattern(flines, pat, verbatims):
     starts = {}
@@ -1771,52 +1754,81 @@ def read_header(flines):
             mst = starts.get(sref, m)
             j, indent, sref, is_start, after = mst
             yield (j, i, indent, sref, after)</t>
-<t tx="vitalije.20170721090105.1">node_start_patterns = {
-   '#' : re.compile('^(\\s*)#@[+]node:([^:]+): [*](\\d+)?([*])? (.*)$', re.DOTALL),
-   '.. ': re.compile('^(\\s*)[.][.] @[+]node:([^:]+): [*](\\d+)?([*])? (.*)$', re.DOTALL),
-   '&lt;!--': re.compile('^(\\s*)&lt;!--@[+]node:([^:]+): [*](\\d+)?([*])? (.*?)--&gt;$', re.DOTALL),
-   '/*': re.compile('^(\\s*)/[*]@[+]node:([^:]+): [*](\\d+)?([*])? (.*?)[*]/$', re.DOTALL),
-   '//': re.compile('^(\\s*)//@[+]node:([^:]+): [*](\\d+)?([*])? (.*)$', re.DOTALL),
-   ';' : re.compile('^(\\s*);@[+]node:([^:]+): [*](\\d+)?([*])? (.*)$', re.DOTALL),
-   'REM ' : re.compile('^(\\s*)REM @[+]node:([^:]+): [*](\\d+)?([*])? (.*)$', re.DOTALL),
-   '%' : re.compile('^(\\s*)%@[+]node:([^:]+): [*](\\d+)?([*])? (.*)$', re.DOTALL),
+<t tx="vitalije.20170721090105.1">patterns = {
+    '#': g.bunch(
+            node_start = re.compile('^(\\s*)#@[+]node:([^:]+): '
+                                    '[*](\\d+)?([*])? (.*)$', re.DOTALL),
+            section = re.compile('^(\\s*)#@([+]|-)&lt;{2}(.+?)&gt;{2}(.*)$',
+                            re.DOTALL),
+            others = re.compile('^(\\s*)#@([+]|-)others\\s*$', re.DOTALL),
+            all = re.compile('^(\\s*)#@([+]|-)all\\s*$', re.DOTALL),
+        ),
+    '.. ': g.bunch(
+            node_start = re.compile('^(\\s*)[.][.] @[+]node:([^:]+): '
+                                    '[*](\\d+)?([*])? (.*)$', re.DOTALL),
+            section = re.compile('^(\\s*)[.][.] @([+]|-)&lt;{2}(.+?)&gt;{2}(.*)$',
+                            re.DOTALL),
+            others = re.compile('^(\\s*)[.][.] @([+]|-)others\\s*$', re.DOTALL),
+            all = re.compile('^(\\s*)[.][.] @([+]|-)all\\s*$', re.DOTALL),
+        ),
+    '&lt;!--': g.bunch(
+            node_start = re.compile('^(\\s*)&lt;!--@[+]node:([^:]+): '
+                                    '[*](\\d+)?([*])? (.*?)--&gt;$', re.DOTALL),
+            section = re.compile('^(\\s*)&lt;!--@([+]|-)&lt;{2}(.+?)&gt;{2}--&gt;(.*?)$',
+                                    re.DOTALL),
+            others = re.compile('^(\\s*)&lt;!--@([+]|-)others--&gt;\\s*$', re.DOTALL),
+            all = re.compile('^(\\s*)&lt;!--@([+]|-)all--&gt;\\s*$', re.DOTALL),
+        ),
+    '/*': g.bunch(
+            node_start = re.compile('^(\\s*)/[*]@[+]node:([^:]+): '
+                                    '[*](\\d+)?([*])? (.*?)[*]/$', re.DOTALL),
+            section = re.compile('^(\\s*)/[*]@([+]|-)&lt;{2}(.+?)&gt;{2}[*]/(.*?)$',
+                                     re.DOTALL),
+            others = re.compile('^(\\s*)/[*]@([+]|-)others[*]/\\s*$', re.DOTALL),
+            all = re.compile('^(\\s*)/[*]@([+]|-)all[*]/\\s*$', re.DOTALL),
+        ),
+    '//': g.bunch(
+            node_start = re.compile('^(\\s*)//@[+]node:([^:]+): '
+                                    '[*](\\d+)?([*])? (.*)$', re.DOTALL),
+            section = re.compile('^(\\s*)//@([+]|-)&lt;{2}(.+?)&gt;{2}(.*)$',
+                                    re.DOTALL),
+            others = re.compile('^(\\s*)//@([+]|-)others\\s*$', re.DOTALL),
+            all = re.compile('^(\\s*)//@([+]|-)all\\s*$', re.DOTALL),
+        ),
+    ';': g.bunch(
+            node_start = re.compile('^(\\s*);@[+]node:([^:]+): '
+                                    '[*](\\d+)?([*])? (.*)$', re.DOTALL),
+            section = re.compile('^(\\s*);@([+]|-)&lt;{2}(.+?)&gt;{2}(.*)$',
+                                    re.DOTALL),
+            others = re.compile('^(\\s*);@([+]|-)others\\s*$', re.DOTALL),
+            all = re.compile('^(\\s*);@([+]|-)all\\s*$', re.DOTALL),
+        ),
+    'REM ': g.bunch(
+            node_start = re.compile('^(\\s*)REM @[+]node:([^:]+): '
+                                    '[*](\\d+)?([*])? (.*)$', re.DOTALL),
+            section = re.compile('^(\\s*)REM @([+]|-)&lt;{2}(.+?)&gt;{2}(.*)$',
+                                    re.DOTALL),
+            others = re.compile('^(\\s*)REM @([+]|-)others\\s*$', re.DOTALL),
+            all = re.compile('^(\\s*)REM @([+]|-)all\\s*$', re.DOTALL),
+        ),
+    '%': g.bunch(
+            node_start = re.compile('^(\\s*)%@[+]node:([^:]+): '
+                                    '[*](\\d+)?([*])? (.*)$', re.DOTALL),
+            section = re.compile('^(\\s*)%@([+]|-)&lt;{2}(.+?)&gt;{2}(.*)$',
+                                    re.DOTALL),
+            others = re.compile('^(\\s*)%@([+]|-)others\\s*$', re.DOTALL),
+            all = re.compile('^(\\s*)%@([+]|-)all\\s*$', re.DOTALL),
+        ),
 }</t>
-<t tx="vitalije.20170721091318.1">def at_others_with_pattern(flines, pat, verbatims):
-    starts = []
-    for i, line in flines:
-        if i in verbatims: continue
-        m = match_at_others(i, line, pat)
-        if not m: continue
-        if m[2]:
-            starts.append(m)
-        else:
-            j, indent, junk = starts.pop()
-            yield j, i, indent</t>
 <t tx="vitalije.20170721091325.1">def match_at_others(i, line, pat):
     m = pat.match(line)
     if m:
         return (i, m.group(1), m.group(2) == '+')
     else:
         return False</t>
-<t tx="vitalije.20170721091336.1">at_others_patterns = {
-    '#':   re.compile('^(\\s*)#@([+]|-)others\\s*$', re.DOTALL),
-    '.. ': re.compile('^(\\s*)[.][.] @([+]|-)others\\s*$', re.DOTALL),
-   '&lt;!--': re.compile('^(\\s*)&lt;!--@([+]|-)others--&gt;\\s*$', re.DOTALL),
-   '/*':   re.compile('^(\\s*)/[*]@([+]|-)others[*]/\\s*$', re.DOTALL),
-   '//':   re.compile('^(\\s*)//@([+]|-)others\\s*$', re.DOTALL),
-   ';' :   re.compile('^(\\s*);@([+]|-)others\\s*$', re.DOTALL),
-   'REM ': re.compile('^(\\s*)REM @([+]|-)others\\s*$', re.DOTALL),
-   '%': re.compile('^(\\s*)%@([+]|-)others\\s*$', re.DOTALL),
-}</t>
 <t tx="vitalije.20170721095723.1">def at_all_refs(data):
-    flines, delim_st, delim_en, verbatims = data
-    pat = at_all_patterns.get(delim_st)
-    if not pat:
-        g.warning('no pattern for at all search and delim[%s]'%delim_st)
-    else:
-        return at_all_with_pattern(flines, pat, verbatims)
-</t>
-<t tx="vitalije.20170721095723.2">def at_all_with_pattern(flines, pat, verbatims):
+    flines, ptrns, verbatims = data
+    pat = ptrns.all
     starts = []
     for i, line in flines:
         if i in verbatims: continue
@@ -1826,23 +1838,14 @@ def read_header(flines):
             starts.append(m)
         else:
             j, indent, junk = starts.pop()
-            yield j, i, indent</t>
+            yield j, i, indent
+</t>
 <t tx="vitalije.20170721095723.3">def match_at_all(i, line, pat):
     m = pat.match(line)
     if m:
         return (i, m.group(1), m.group(2) == '+')
     else:
         return False</t>
-<t tx="vitalije.20170721095723.4">at_all_patterns = {
-    '#':   re.compile('^(\\s*)#@([+]|-)all\\s*$', re.DOTALL),
-    '.. ': re.compile('^(\\s*)[.][.] @([+]|-)all\\s*$', re.DOTALL),
-   '&lt;!--': re.compile('^(\\s*)&lt;!--@([+]|-)all--&gt;\\s*$', re.DOTALL),
-   '/*':   re.compile('^(\\s*)/[*]@([+]|-)all[*]/\\s*$', re.DOTALL),
-   '//':   re.compile('^(\\s*)//@([+]|-)all\\s*$', re.DOTALL),
-   ';' :   re.compile('^(\\s*);@([+]|-)all\\s*$', re.DOTALL),
-   'REM ': re.compile('^(\\s*)REM @([+]|-)all\\s*$', re.DOTALL),
-   '%': re.compile('^(\\s*)%@([+]|-)all\\s*$', re.DOTALL),
-}</t>
 <t tx="vitalije.20170721100518.1">def read_verbatims(flines, delim_st):
     st = delim_st + '@verbatim'
     in_verb = False
@@ -1869,5 +1872,40 @@ end_delimiters = {
     '&lt;!--': '-''-&gt;',
     '/*': '*''/'
 }</t>
+<t tx="vitalije.20170721173437.1">def read_at_last_lines(analytics):
+    a = analytics; flines = a.flines
+    leo_end = a.delim_st + '@-leo'
+    j, line = flines[-1]
+    while j &gt; 0:
+        if line.startswith(leo_end) :
+            break
+        j, line = flines[j - 1]
+    for i, line in flines[j+1:]:
+        yield line</t>
+<t tx="vitalije.20170721174314.1">def indent(n, s):
+    return ' ' * n + s</t>
+<t tx="vitalije.20170721180227.1">def end_of_node_in_all(st, end_all, analytics):
+    a = analytics
+    # inside at-all block: 
+    #      node ends on first next node start
+    #      or at the end of at-all block
+    is_gt = lambda x: x &gt; st
+    after_nodes = filter(is_gt, a.nstart.keys())
+    return min(after_nodes, default=end_all)</t>
+<t tx="vitalije.20170721180649.1">def end_of_node_in_others(st, lev, analytics):
+    a = analytics
+    # in others block node ends at the end of others block
+    # or on the beginning of node at the same level or upper  
+    j = len(a.flines)
+    for gnx, nd in a.nodes.items():
+        for (i, lev2, h2, wsp) in nd:
+            if lev2 &lt;= lev and i &gt; st:
+                j = min(j, i)
+    return j</t>
+<t tx="vitalije.20170721184930.1">def get_patterns(delim_st):
+    ptrns = patterns.get(delim_st)
+    if not ptrns:
+        g.error('no valid patterns for delimiter: %r'%delim_st)
+    return ptrns</t>
 </tnodes>
 </leo_file>
