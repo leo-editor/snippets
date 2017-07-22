@@ -105,9 +105,14 @@
 <v t="ekr.20170719102447.20"><vh>section_replacer</vh></v>
 <v t="vitalije.20170722151650.1"><vh>joiner</vh></v>
 <v t="vitalije.20170722173013.1"><vh>open_node</vh></v>
-<v t="ekr.20170719102447.21"><vh>body_lines</vh></v>
+<v t="ekr.20170719102447.21"><vh>body_lines</vh>
+<v t="vitalije.20170722211247.1"><vh>verbatim</vh></v>
+<v t="vitalije.20170722201910.1"><vh>first lines &amp; leo header</vh></v>
+<v t="vitalije.20170722202024.1"><vh>last lines</vh></v>
+</v>
 <v t="vitalije.20170722144500.1"><vh>needs_verbatim</vh></v>
 <v t="ekr.20170719102447.22"><vh>others_replacer</vh></v>
+<v t="vitalije.20170722203602.1"><vh>atall_replacer</vh></v>
 <v t="vitalije.20170722174341.1"><vh>log_it debug iterator</vh></v>
 <v t="ekr.20170719102447.23"><vh>all_lines</vh></v>
 <v t="ekr.20170719102447.24"><vh>at_docer</vh>
@@ -149,6 +154,7 @@
 <v t="vitalije.20170722124118.1"><vh>prepare</vh></v>
 <v t="vitalije.20170722143839.1"><vh>line_completer</vh></v>
 <v t="vitalije.20170722191548.1"><vh>test_160</vh></v>
+<v t="vitalije.20170722201021.1"><vh>test_395</vh></v>
 <v t="vitalije.20170722191554.1"><vh>test_160_old</vh></v>
 <v t="vitalije.20170722191557.1"><vh>time_test</vh></v>
 <v t="vitalije.20170722191602.1"><vh>test_160_new</vh></v>
@@ -235,24 +241,9 @@ def others_iterator(p):
         yield p, open_node(p, conf), True
     if p.b:
         for i, line in enumerate(g.splitLines(p.b)):
-            if conf.first:
-                if line.startswith('@first '):
-                    yield p, line[7:], True
-                    continue
-                else:
-                    conf.first = False
-                    yield p, joiner(conf.delim_st, '@+leo-ver=5-thin', conf.delim_en, '\n'), True
-                    yield p, open_node(p, conf), True
-                    fstr = conf.delim_st + '@@first' + conf.delim_en + '\n'
-                    for k in range(i):
-                        yield p, fstr, True
-            if line.startswith('@last '):
-                conf.last.append(line[6:])
-                yield p, '@last\n', True
-                continue
-            elif conf.last:
-                g.error('@last must be last line in body')
-            conf.verbatim = needs_verbatim(line, conf)
+            # child nodes should use continue
+            # if they need to skip following nodes
+            @others
             yield p, line, False
         if not line.endswith('\n'):
             yield p, '\n', False</t>
@@ -284,6 +275,8 @@ def others_iterator(p):
     if trace:
         it = body_lines(p, conf)
         it = log_it('body_lines', it)
+        it = atall_replacer(it, conf)
+        it = log_it('all_repl', it)
         it = section_replacer(it, conf)
         it = log_it('sec_repl', it)
         it = others_replacer(it, conf)
@@ -294,6 +287,7 @@ def others_iterator(p):
         it = log_it('at_docer', it)
     else:
         it = body_lines(p, conf)
+        it = atall_replacer(it, conf)
         it = section_replacer(it, conf)
         it = others_replacer(it, conf)
         it = at_adder(it, conf)
@@ -304,7 +298,7 @@ def others_iterator(p):
 code_pattern = re.compile('^(@code|@c)$')
 def at_docer(it, conf):
     for p, w, final in it:
-        if conf.verbatim or conf.first or final:
+        if conf.verbatim or conf.first or final or conf.in_all:
             yield p, w, final
             continue
         @others
@@ -320,7 +314,7 @@ def at_adder(it, conf):
             yield p, w, final
             continue
         m = atdir_pat.match(w)
-        if m:
+        if m and not conf.in_all:
             if m.group(1) in ('first', 'last'):
                 yield p, joiner(conf.delim_st, '@', m.group(0), '\n'), True
             else:
@@ -1704,7 +1698,10 @@ About exp-5 dev
 Working on write code. At present generating lines of leo/core/leoGlobals.py
 works as expected (same as leoAtFile.py). Next task will be to try generating
 lines of leo/test/activeUnitTests.txt which seems to be most chalenging file
-in Leo distribution. </t>
+in Leo distribution.
+
+22-07-2017 21:20:09
+Writing leo/test/activeUnitTests.txt with new code working properly.</t>
 <t tx="vitalije.20170720214636.1"></t>
 <t tx="vitalije.20170721074235.1">This file contains scripts that test how fast can be calculated
 line number in external file for any given line in at-anyfile
@@ -2130,17 +2127,8 @@ c.frame.log.selectTab('Log')
 c.frame.log.clearLog()
 #g.es(time_test(100, test_160_new), 'seconds iterator writer')
 #g.es(time_test(100, test_160_old), 'seconds old writer')
-g.es('success' if test_160_new() == test_160_old() else 'failure')
-s1 = test_160_new()
-s2 = test_160_old()
-s3 = get_file(160)
-g.es('s2==s3?', s2==s3)
-with open('/tmp/t.py', 'w') as out:
-    out.write(s2)
-g.es(encoded_diff(s1,s2))
-g.es(''.join(g.splitLines(s1)[-10:]))
-g.es('----------------------')
-g.es(''.join(g.splitLines(s2)[-10:]))
+g.es('success' if test_395() else 'failure')
+
 </t>
 <t tx="vitalije.20170722124118.1">def prepare():
     p = starting_pos()
@@ -2148,7 +2136,16 @@ g.es(''.join(g.splitLines(s2)[-10:]))
         ok, p = do_import_file(160)
         if ok: return p
     assert p, 'Error'
-    return p</t>
+    return p
+def prepare395():
+    p = c.find_h('@file activeUnitTests.txt')
+    if not p:
+        ok, p = do_import_file(395)
+        c.redraw()
+    else:
+        p = p[0]
+    assert p, 'Error'
+    return p </t>
 <t tx="vitalije.20170722133741.1">m = doc_pattern.match(w)
 if m:
     conf.in_doc = True
@@ -2183,7 +2180,7 @@ if m:
             yield ''.join(res)
             res = []</t>
 <t tx="vitalije.20170722144500.1">def needs_verbatim(line, conf):
-    return False</t>
+    return line.lstrip().startswith(conf.delim_st + '@')</t>
 <t tx="vitalije.20170722151650.1">def joiner(*args):
     return ''.join(args)</t>
 <t tx="vitalije.20170722173013.1">def open_node(p, conf):
@@ -2273,5 +2270,77 @@ at-asis directives that are still not recognizable by new reading code.
 
 Finally, even leo/test/activeUnitTests.txt are successfully read by new code.
 Now all 401 valid derived file can be read the same way as with the old code.</t>
+<t tx="vitalije.20170722201021.1">def test_395():
+    p = prepare395()
+    lines = get_lines(395)
+    conf = g.bunch(
+        delim_st='#', delim_en='',
+        in_doc=False,
+        in_others=False,
+        in_all=False,
+        verbatim=False,
+        zero_level=p.level(),
+        first=True,
+        count_first=0,
+        last=[]
+    )
+    log = []
+    it = all_lines(p, conf)
+    it = line_completer(it, conf)
+    for i, line in enumerate(lines):
+        line2 = next(it,'------ None ------')
+        if len(log) &gt; 4:
+            log.pop(0)
+        log.append((i, line, line2))
+        if line != line2:
+            for n, a, b in log:
+                g.es(n+1, a, newline=False)
+                g.es(n+1, b, color='blue', newline=False)
+            return False
+            for j in range(i+1, i+5):
+                g.es(j, lines[j], newline=False)
+                g.es(j, next(it), newline=False, color='yellow')
+            return False
+    return True</t>
+<t tx="vitalije.20170722201910.1">if conf.first and not conf.in_all:
+    if line.startswith('@first '):
+        yield p, line[7:], True
+        continue
+    else:
+        conf.first = False
+        yield p, joiner(conf.delim_st, '@+leo-ver=5-thin', conf.delim_en, '\n'), True
+        yield p, open_node(p, conf), True
+        fstr = conf.delim_st + '@@first' + conf.delim_en + '\n'
+        for k in range(i):
+            yield p, fstr, True</t>
+<t tx="vitalije.20170722202024.1">if not conf.in_all:
+    if line.startswith('@last '):
+        conf.last.append(line[6:])
+        yield p, joiner(conf.delim_st, '@@last', conf.delim_en, '\n'), True
+        continue
+    elif conf.last:
+        g.error('@last must be last line in body')
+        break</t>
+<t tx="vitalije.20170722203602.1">def atall_replacer(it, conf):
+    for p, w, final in it:
+        if conf.verbatim or conf.first or final:
+            yield p, w, final
+            continue
+        if w == '@all\n':
+            conf.in_all = True
+            yield p, joiner(conf.delim_st, '@+all', conf.delim_en, '\n'), True
+            for p1 in p.subtree_iter():
+                for p2, w2, final in all_lines(p1, conf):
+                    yield p2, w2, final
+            w1 = joiner(conf.delim_st, '@-all', conf.delim_en, '\n')
+            yield p, w1, True
+            conf.in_all = False
+        else:
+            yield p, w, final</t>
+<t tx="vitalije.20170722211247.1">conf.verbatim = needs_verbatim(line, conf)
+if conf.verbatim:
+    yield p, joiner(conf.delim_st, '@verbatim\n'), True
+    yield p, line, False
+    continue</t>
 </tnodes>
 </leo_file>
