@@ -11,6 +11,7 @@
 <vnodes>
 <v t="vitalije.20170720214543.2"><vh>About this experiment</vh>
 <v t="vitalije.20170721074235.1"><vh>&lt;&lt;about exp-3 dev&gt;&gt;</vh></v>
+<v t="vitalije.20170722193355.1"><vh>&lt;&lt;about exp-4 dev&gt;&gt;</vh></v>
 </v>
 <v t="vitalije.20170720180020.1"><vh>exp-3 dev @key=Alt-4</vh>
 <v t="vitalije.20170720214432.1"><vh>importing derived files</vh>
@@ -102,13 +103,19 @@
 <v t="ekr.20170719102447.18"><vh>MissingSection</vh></v>
 <v t="ekr.20170719102447.19"><vh>others_iterator</vh></v>
 <v t="ekr.20170719102447.20"><vh>section_replacer</vh></v>
+<v t="vitalije.20170722151650.1"><vh>joiner</vh></v>
+<v t="vitalije.20170722173013.1"><vh>open_node</vh></v>
 <v t="ekr.20170719102447.21"><vh>body_lines</vh></v>
+<v t="vitalije.20170722144500.1"><vh>needs_verbatim</vh></v>
 <v t="ekr.20170719102447.22"><vh>others_replacer</vh></v>
+<v t="vitalije.20170722174341.1"><vh>log_it debug iterator</vh></v>
 <v t="ekr.20170719102447.23"><vh>all_lines</vh></v>
-<v t="ekr.20170719102447.24"><vh>at_docer</vh></v>
+<v t="ekr.20170719102447.24"><vh>at_docer</vh>
+<v t="vitalije.20170722133741.1"><vh>at, at-doc</vh></v>
+<v t="vitalije.20170722133822.1"><vh>at-c at-code</vh></v>
+</v>
 <v t="ekr.20170719102447.25"><vh>at_adder</vh></v>
 <v t="ekr.20170719102447.26"><vh>star_level</vh></v>
-<v t="ekr.20170719102447.27"><vh>node_opener</vh></v>
 </v>
 <v t="vitalije.20170720181053.1"><vh>patch VNode</vh>
 <v t="vitalije.20170720181045.1"><vh>vnode_get_lines</vh></v>
@@ -125,6 +132,11 @@
 <v t="vitalije.20170721190334.1"><vh>Utils</vh>
 <v t="vitalije.20170721174314.1"><vh>indent</vh></v>
 </v>
+<v t="vitalije.20170722122928.1"><vh>Diffing ...</vh>
+<v t="vitalije.20170710155333.1"><vh>diff_encoder</vh></v>
+<v t="vitalije.20170710155637.1"><vh>encoded_diff</vh></v>
+<v t="vitalije.20170710155253.1"><vh>line_transformer</vh></v>
+</v>
 <v t="ekr.20170719102447.28"></v>
 <v t="ekr.20170719102447.10"></v>
 </v>
@@ -132,13 +144,22 @@
 <v t="vitalije.20170721201600.1"><vh>compare_reading_file</vh></v>
 <v t="vitalije.20170721201605.1"><vh>compare_reading_all_files</vh></v>
 </v>
+<v t="vitalije.20170722123231.1"><vh>exp-5 dev @key=Alt-4</vh>
+<v t="vitalije.20170721075016.1"></v>
+<v t="vitalije.20170722124118.1"><vh>prepare</vh></v>
+<v t="vitalije.20170722143839.1"><vh>line_completer</vh></v>
+<v t="vitalije.20170722191548.1"><vh>test_160</vh></v>
+<v t="vitalije.20170722191554.1"><vh>test_160_old</vh></v>
+<v t="vitalije.20170722191557.1"><vh>time_test</vh></v>
+<v t="vitalije.20170722191602.1"><vh>test_160_new</vh></v>
+</v>
 <v t="vitalije.20170720214636.1"><vh>EXTERNALS</vh></v>
 </vnodes>
 <tnodes>
 <t tx="ekr.20170719102447.10"></t>
 <t tx="ekr.20170719102447.11">def starting_pos():
-    pi = c.find_h('@file leoGlobals.py') [0]
-    return pi</t>
+    pi = c.find_h('@file leoGlobals.py')
+    return pi[0] if pi else None</t>
 <t tx="ekr.20170719102447.12">def add_ident(n, it):
     wsp = ' '*n
     for w in it:
@@ -169,7 +190,7 @@
     return s if i &lt; 0 else s[i+n:]</t>
 <t tx="ekr.20170719102447.18">class MissingSection(IndexError):
     pass</t>
-<t tx="ekr.20170719102447.19">others_pat = re.compile('^\\s*@others', re.M)
+<t tx="ekr.20170719102447.19">others_pat = re.compile('^(\\s*)@others', re.M)
 
 def others_iterator(p):
     after = p.nodeAfterTree()
@@ -184,114 +205,133 @@ def others_iterator(p):
             else:
                 p1.moveToThreadNext()
 </t>
-<t tx="ekr.20170719102447.20">def section_replacer(it, zero_level):
-    for p, w in it:
+<t tx="ekr.20170719102447.20">def section_replacer(it, conf):
+    for p, w, final in it:
+        if conf.verbatim or conf.first or final:
+            yield p, w, final
+            continue
         sref = section_ref(w)
         if sref:
-            indent = before_double_gt(w)
-            yield None, indent
-            p1 = g.findReference(sref, p)
-            if not p1:
-                raise MissingSection(w)
-            yield None, '#@+'
-            yield None, sref
-            yield None, '\n'
-            for junk, w1 in all_lines(p1, zero_level):
-                yield None, indent
-                yield None, w1
-            yield None, indent
-            yield None, '#@-'
-            yield None, sref
-            yield None, after_str(w, sref)
+            if conf.in_all:
+                conf.verbatim = True
+                yield p, w, False
+                conf.verbatim = False
+            else:
+                indent = before_double_gt(w)
+                p1 = g.findReference(sref, p)
+                if not p1:
+                    raise MissingSection(w)
+                yield p, joiner(indent, conf.delim_st, '@+', sref, conf.delim_en, '\n'), True
+                for p2, w1, final in all_lines(p1, conf):
+                    w1 = indent + w1 if w1 != '\n' else w1
+                    yield p2, w1, final
+                yield p, joiner(indent, conf.delim_st,
+                             '@-', sref, conf.delim_en, after_str(w, sref)), True
         else:
-            yield p, w
+            yield p, w, final
 </t>
-<t tx="ekr.20170719102447.21">def body_lines(p):
+<t tx="ekr.20170719102447.21">def body_lines(p, conf):
+    if not conf.first:
+        yield p, open_node(p, conf), True
     if p.b:
-        for line in g.splitLines(p.b):
-            yield p, line
+        for i, line in enumerate(g.splitLines(p.b)):
+            if conf.first:
+                if line.startswith('@first '):
+                    yield p, line[7:], True
+                    continue
+                else:
+                    conf.first = False
+                    yield p, joiner(conf.delim_st, '@+leo-ver=5-thin', conf.delim_en, '\n'), True
+                    yield p, open_node(p, conf), True
+                    fstr = conf.delim_st + '@@first' + conf.delim_en + '\n'
+                    for k in range(i):
+                        yield p, fstr, True
+            if line.startswith('@last '):
+                conf.last.append(line[6:])
+                yield p, '@last\n', True
+                continue
+            elif conf.last:
+                g.error('@last must be last line in body')
+            conf.verbatim = needs_verbatim(line, conf)
+            yield p, line, False
         if not line.endswith('\n'):
-            yield p, '\n'
-    else:
-        yield p, ''</t>
-<t tx="ekr.20170719102447.22">def others_replacer(it, zero_level):
-    for p, w in it:
-        i = g.skip_ws(w, 0)
-        if p and g.match(w, i, '@others'):
-            indent = w[:i]
-            yield p, indent
-            yield None, '#@+others\n'
-            for p1 in others_iterator(p):
-                for p2, w2 in all_lines(p1, zero_level):
-                    yield None, indent
-                    yield None, w2
-            yield None, indent
-            yield None, '#@-others\n'
+            yield p, '\n', False</t>
+<t tx="ekr.20170719102447.22">def others_replacer(it, conf):
+    for p, w, final in it:
+        if conf.verbatim or conf.first or final:
+            yield p, w, final
+            continue
+        m = others_pat.match(w)
+        if m:
+            if conf.in_all:
+                conf.verbatim = True
+                yield p, w, False
+                conf.verbatim = False
+            else:
+                indent = m.group(1)
+                w1 = joiner(m.group(1), conf.delim_st, '@+others', conf.delim_en, '\n')
+                yield p, w1, True
+                for p1 in others_iterator(p):
+                    for p2, w2, final in all_lines(p1, conf):
+                        w2 = indent + w2 if w2 != '\n' else w2
+                        yield p2, w2, final
+                w1 = joiner(indent, conf.delim_st, '@-others', conf.delim_en, '\n')
+                yield p, w1, True
         else:
-            yield p, w</t>
-<t tx="ekr.20170719102447.23">def all_lines(p, zero_level):
-    it = body_lines(p)
-    it = section_replacer(it, zero_level)
-    it = others_replacer(it, zero_level)
-    it = node_opener(it, zero_level)
-    it = at_adder(it)
-    it = at_docer(it)
+            yield p, w, final</t>
+<t tx="ekr.20170719102447.23">def all_lines(p, conf):
+    trace = False
+    if trace:
+        it = body_lines(p, conf)
+        it = log_it('body_lines', it)
+        it = section_replacer(it, conf)
+        it = log_it('sec_repl', it)
+        it = others_replacer(it, conf)
+        it = log_it('oth_repl', it)
+        it = at_adder(it, conf)
+        it = log_it('at_adder', it)
+        it = at_docer(it, conf)
+        it = log_it('at_docer', it)
+    else:
+        it = body_lines(p, conf)
+        it = section_replacer(it, conf)
+        it = others_replacer(it, conf)
+        it = at_adder(it, conf)
+        it = at_docer(it, conf)
     return it
 </t>
-<t tx="ekr.20170719102447.24">def at_docer(it):
-    in_doc = False
-    for p, w in it:
-        if w[1:2].isspace() and g.match(w, 0, '@'):
-            in_doc = True
-            yield None, '#@+at'
-            yield None, w[1:]
+<t tx="ekr.20170719102447.24">doc_pattern = re.compile('^(@doc|@)(?:\\s(.*?)\n|\n)$')
+code_pattern = re.compile('^(@code|@c)$')
+def at_docer(it, conf):
+    for p, w, final in it:
+        if conf.verbatim or conf.first or final:
+            yield p, w, final
             continue
-        if w[:2] == '@c' and w[2:3].isspace():
-            yield p, w
-            in_doc = False
-            continue
-        if w.startswith('@code') and w[5:6].isspace():
-            in_doc = False
-            yield p, w
-            continue
-        if in_doc and w != '#@':
-            yield None, '# '
-            yield p, w
+        @others
+        if conf.in_doc and not conf.delim_en:
+            yield p, joiner(conf.delim_st, ' ', w), True
         else:
-            yield p, w</t>
-<t tx="ekr.20170719102447.25">atdir_pat = re.compile('^@(code|c\\s|doc|nobeautify|first|last|language|tabwidth|pagewidth)')
+            yield p, w, False</t>
+<t tx="ekr.20170719102447.25">atdir_pat = re.compile('^@(nobeautify|last|language|tabwidth|pagewidth)')
 
-def at_adder(it):
-    for p, w in it:
+def at_adder(it, conf):
+    for p, w, final in it:
+        if conf.verbatim or conf.first or final:
+            yield p, w, final
+            continue
         m = atdir_pat.match(w)
-        if p and m:
-            yield None, '#@'
+        if m:
             if m.group(1) in ('first', 'last'):
-                yield None, '@'
-                yield None, m.group(1)
-                yield None, '\n'
+                yield p, joiner(conf.delim_st, '@', m.group(0), '\n'), True
             else:
-                yield None, w
+                yield p, joiner(conf.delim_st, '@', w[:-1], conf.delim_en, '\n'), True
         else:
-            yield p, w</t>
+            yield p, w, False</t>
 <t tx="ekr.20170719102447.26">def star_level(lev):
     if lev &lt; 2:
         return [': * ', ': ** '][lev]
     else:
         return ': *%d* '%(lev + 1)</t>
-<t tx="ekr.20170719102447.27">def node_opener(it, zero_level):
-    prev_pos = None
-    for p, w in it:
-        if p is None or p == prev_pos:
-            yield p, w
-        else:
-            prev_pos = p
-            yield None, '#@+node:'
-            yield None, p.gnx
-            yield None, star_level(p.level() - zero_level)
-            yield None, p.h
-            yield None, '\n'
-            yield p, w</t>
 <t tx="ekr.20170719102447.28"></t>
 <t tx="ekr.20170719102447.29">def node_start_lines(data):
     flines, ptrns, verbatims = data
@@ -473,6 +513,56 @@ def at_adder(it):
             # first lines are only before at+leo
             break
         yield line
+</t>
+<t tx="vitalije.20170710155253.1">def line_transformer(lines, codes):
+    i = 0; n = len(codes)
+    j = 0
+    while j &lt; n:
+        code = codes[j][0]
+        arg = codes[j][1:]
+        j += 1
+        if code == 's':
+            i += int(arg)
+        elif code == 'r':
+            yield arg
+            i += 1
+        elif code == 'c':
+            for k in range(int(arg)):
+                yield lines[i]
+                i += 1
+        elif code == 'i':
+            yield arg
+
+</t>
+<t tx="vitalije.20170710155333.1">def diff_encoder(a, b):
+    sm = difflib.SequenceMatcher(a=a, b=b, autojunk=False)
+    i = 0; j = 0
+    for bl in sm.get_matching_blocks():
+        if (bl.a - i) == (bl.b - j) and (bl.a &gt; i):
+            while bl.a &gt; i:
+                yield 'r%s'%b[j]
+                i += 1
+                j += 1
+        else:
+            if bl.a &gt; i:
+                yield 's%d\n'%(bl.a - i)
+                i = bl.a
+            while bl.b &gt; j:
+                yield 'i%s'%b[j]
+                j += 1
+        if bl.size:
+            yield 'c%d\n'%bl.size
+            i += bl.size
+            j += bl.size
+</t>
+<t tx="vitalije.20170710155637.1">def encoded_diff(a, b):
+    '''Returns encoded diff between strings a and b.
+       Returned diff contains one opcode per line.
+       Opcodes when combined with lines from a
+       using line_transformer give lines of b.'''
+    aa = g.splitLines(a)
+    bb = g.splitLines(b)
+    return ''.join(diff_encoder(aa, bb))
 </t>
 <t tx="vitalije.20170720180020.1">import itertools
 import re
@@ -1605,25 +1695,16 @@ def get_file(n):
 <t tx="vitalije.20170720214543.2">At first this file contained only scripts in `exp-3 dev` node.
 &lt;&lt;about exp-3 dev&gt;&gt; original about this file
 
-About exp-4 dev 
+&lt;&lt;about exp-4 dev&gt;&gt;
 
-.. now 2017-07-21 13:39:02.725184
+About exp-5 dev
 
-Work on read derived files continues on. Right now when executing script
-in `exp-4 dev` node, Leo will compare reading of almost all derived files
-that could be found in Leo installation directory. Except for some 
-ancient derived file formats and some files that have @+leo inside, but
-are not real derived files (false_positives), all other derived files
-can be successfully read by new reading code.
+22-07-2017 19:37:01
 
-The only file that new reading code still can't read is activeUnitTests.txt
-located in leo/test/ directory. This file contains some at-raw, and 
-at-asis directives that are still not recognizable by new reading code.
-
-.. now 21-07-2017 21:09:51
-
-Finally, even leo/test/activeUnitTests.txt are successfully read by new code.
-Now all 401 valid derived file can be read the same way as with the old code.</t>
+Working on write code. At present generating lines of leo/core/leoGlobals.py
+works as expected (same as leoAtFile.py). Next task will be to try generating
+lines of leo/test/activeUnitTests.txt which seems to be most chalenging file
+in Leo distribution. </t>
 <t tx="vitalije.20170720214636.1"></t>
 <t tx="vitalije.20170721074235.1">This file contains scripts that test how fast can be calculated
 line number in external file for any given line in at-anyfile
@@ -1653,6 +1734,7 @@ any error in line numbering is noticed.</t>
 <t tx="vitalije.20170721074430.1">import itertools
 import re
 import leo.core.leoNodes as leoNodes
+import difflib
 import timeit
 import pprint
 @others
@@ -2036,5 +2118,160 @@ if atcode:
     yield line
     in_doc = False
     continue</t>
+<t tx="vitalije.20170722122928.1"></t>
+<t tx="vitalije.20170722123231.1">import itertools
+import re
+import leo.core.leoNodes as leoNodes
+import difflib
+import timeit
+import pprint
+@others
+c.frame.log.selectTab('Log')
+c.frame.log.clearLog()
+#g.es(time_test(100, test_160_new), 'seconds iterator writer')
+#g.es(time_test(100, test_160_old), 'seconds old writer')
+g.es('success' if test_160_new() == test_160_old() else 'failure')
+s1 = test_160_new()
+s2 = test_160_old()
+s3 = get_file(160)
+g.es('s2==s3?', s2==s3)
+with open('/tmp/t.py', 'w') as out:
+    out.write(s2)
+g.es(encoded_diff(s1,s2))
+g.es(''.join(g.splitLines(s1)[-10:]))
+g.es('----------------------')
+g.es(''.join(g.splitLines(s2)[-10:]))
+</t>
+<t tx="vitalije.20170722124118.1">def prepare():
+    p = starting_pos()
+    if not p:
+        ok, p = do_import_file(160)
+        if ok: return p
+    assert p, 'Error'
+    return p</t>
+<t tx="vitalije.20170722133741.1">m = doc_pattern.match(w)
+if m:
+    conf.in_doc = True
+    docdir = '@+at' if m.group(1) == '@' else '@+doc'
+    docline = ' ' + m.group(2) if m.group(2) else ''
+    yield p, joiner(conf.delim_st, docdir, docline, conf.delim_en, '\n'), True
+    if conf.delim_en:
+        yield p, conf.delim_st + '\n', True
+    continue</t>
+<t tx="vitalije.20170722133822.1">m = code_pattern.match(w)
+if m:
+    if conf.delim_en:
+        yield p, conf.delim_en  + '\n', True
+    yield p, joiner(conf.delim_st, '@', m.group(1), conf.delim_en, '\n'), True
+    conf.in_doc = False
+    continue</t>
+<t tx="vitalije.20170722143839.1">def line_completer(it, conf):
+    for p, w, final in it:
+        if w:
+            yield w
+    yield conf.delim_st + '@-leo\n'
+    for line in conf.last:
+        yield line
+@
+    res = []
+    for p, w, final in it:
+        if w.endswith('\n') and not res:
+            yield w
+            continue
+        res.append(w)
+        if w.endswith('\n'):
+            yield ''.join(res)
+            res = []</t>
+<t tx="vitalije.20170722144500.1">def needs_verbatim(line, conf):
+    return False</t>
+<t tx="vitalije.20170722151650.1">def joiner(*args):
+    return ''.join(args)</t>
+<t tx="vitalije.20170722173013.1">def open_node(p, conf):
+    conf.in_doc = False
+    return  joiner(conf.delim_st, '@+node:', p.gnx,
+                    star_level(p.level() - conf.zero_level),
+                    p.h, conf.delim_en, '\n')</t>
+<t tx="vitalije.20170722174341.1">log_it_levels = {}
+def log_it(name, it):
+    n = log_it_levels.get(name, 0)
+    log_it_levels[name] = n + 4
+    m = '%s[%s'%(' '*n, name.ljust(10))
+    for p, w, final in it:
+        m1 = m+'F]' if final else m + '*]'
+        g.pr(m1, p.gnx, w, newline=False)
+        yield p, w, final</t>
+<t tx="vitalije.20170722191548.1">def test_160():
+    p = prepare()
+    lines = get_lines(160)
+    conf = g.bunch(
+        delim_st='#', delim_en='',
+        in_doc=False,
+        in_others=False,
+        in_all=False,
+        verbatim=False,
+        zero_level=p.level(),
+        first=True,
+        count_first=0,
+        last=[]
+    )
+    log = []
+    it = all_lines(p, conf)
+    it = line_completer(it, conf)
+    for i, line in enumerate(lines):
+        line2 = next(it,'------ None ------')
+        if len(log) &gt; 4:
+            log.pop(0)
+        log.append((i, line, line2))
+        if line != line2:
+            for n, a, b in log:
+                g.es(n+1, a, newline=False)
+                g.es(n+1, b, color='blue', newline=False)
+            return False
+            for j in range(i+1, i+5):
+                g.es(j, lines[j], newline=False)
+                g.es(j, next(it), newline=False, color='yellow')
+            return False
+    return True</t>
+<t tx="vitalije.20170722191554.1">def test_160_old():
+    p1 = prepare()
+    return g.getScript(c, p1)</t>
+<t tx="vitalije.20170722191557.1">def time_test(num, func):
+    t = timeit.timeit(func, number=num)
+    return t/num</t>
+<t tx="vitalije.20170722191602.1">def test_160_new():
+    p = prepare()
+    conf = g.bunch(
+        delim_st='#', delim_en='',
+        in_doc=False,
+        in_others=False,
+        in_all=False,
+        verbatim=False,
+        zero_level=p.level(),
+        first=True,
+        count_first=0,
+        last=[]
+    )
+    it = all_lines(p, conf)
+    it = line_completer(it, conf)
+    s = ''.join(it)
+    return s</t>
+<t tx="vitalije.20170722193355.1">
+.. now 2017-07-21 13:39:02.725184
+
+Work on read derived files continues on. Right now when executing script
+in `exp-4 dev` node, Leo will compare reading of almost all derived files
+that could be found in Leo installation directory. Except for some 
+ancient derived file formats and some files that have @+leo inside, but
+are not real derived files (false_positives), all other derived files
+can be successfully read by new reading code.
+
+The only file that new reading code still can't read is activeUnitTests.txt
+located in leo/test/ directory. This file contains some at-raw, and 
+at-asis directives that are still not recognizable by new reading code.
+
+.. now 21-07-2017 21:09:51
+
+Finally, even leo/test/activeUnitTests.txt are successfully read by new code.
+Now all 401 valid derived file can be read the same way as with the old code.</t>
 </tnodes>
 </leo_file>
