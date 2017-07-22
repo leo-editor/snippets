@@ -154,6 +154,8 @@
 <v t="vitalije.20170722124118.1"><vh>prepare</vh></v>
 <v t="vitalije.20170722143839.1"><vh>line_completer</vh></v>
 <v t="vitalije.20170722191548.1"><vh>test_160</vh></v>
+<v t="vitalije.20170722215608.1"><vh>get_conf</vh></v>
+<v t="vitalije.20170722212234.1"><vh>test_compare_n</vh></v>
 <v t="vitalije.20170722201021.1"><vh>test_395</vh></v>
 <v t="vitalije.20170722191554.1"><vh>test_160_old</vh></v>
 <v t="vitalije.20170722191557.1"><vh>time_test</vh></v>
@@ -217,7 +219,7 @@ def others_iterator(p):
             yield p, w, final
             continue
         sref = section_ref(w)
-        if sref:
+        if sref and not conf.in_doc:
             if conf.in_all:
                 conf.verbatim = True
                 yield p, w, False
@@ -233,6 +235,7 @@ def others_iterator(p):
                     yield p2, w1, final
                 yield p, joiner(indent, conf.delim_st,
                              '@-', sref, conf.delim_en, after_str(w, sref)), True
+                conf.in_doc = False
         else:
             yield p, w, final
 </t>
@@ -246,14 +249,15 @@ def others_iterator(p):
             @others
             yield p, line, False
         if not line.endswith('\n'):
-            yield p, '\n', False</t>
+            yield p, '\n', False
+</t>
 <t tx="ekr.20170719102447.22">def others_replacer(it, conf):
     for p, w, final in it:
         if conf.verbatim or conf.first or final:
             yield p, w, final
             continue
         m = others_pat.match(w)
-        if m:
+        if m and not conf.in_doc:
             if conf.in_all:
                 conf.verbatim = True
                 yield p, w, False
@@ -268,6 +272,7 @@ def others_iterator(p):
                         yield p2, w2, final
                 w1 = joiner(indent, conf.delim_st, '@-others', conf.delim_en, '\n')
                 yield p, w1, True
+                conf.in_doc = False
         else:
             yield p, w, final</t>
 <t tx="ekr.20170719102447.23">def all_lines(p, conf):
@@ -306,7 +311,9 @@ def at_docer(it, conf):
             yield p, joiner(conf.delim_st, ' ', w), True
         else:
             yield p, w, False</t>
-<t tx="ekr.20170719102447.25">atdir_pat = re.compile('^@(nobeautify|last|language|tabwidth|pagewidth)')
+<t tx="ekr.20170719102447.25">atdir_pat = re.compile('^@(encoding|killbeautify|nosearch|nobeautify|beautify|'
+    'last|language|tabwidth|pagewidth|wrap|color|nocolor|nocolor-node|'
+    'root|killcolor|path)')
 
 def at_adder(it, conf):
     for p, w, final in it:
@@ -1701,7 +1708,13 @@ lines of leo/test/activeUnitTests.txt which seems to be most chalenging file
 in Leo distribution.
 
 22-07-2017 21:20:09
-Writing leo/test/activeUnitTests.txt with new code working properly.</t>
+Writing leo/test/activeUnitTests.txt with new code working properly.
+
+
+22-07-2017 22:55:49
+Writing all derived files from leo installation directory, using new code
+gives the same result as the old code.
+</t>
 <t tx="vitalije.20170720214636.1"></t>
 <t tx="vitalije.20170721074235.1">This file contains scripts that test how fast can be calculated
 line number in external file for any given line in at-anyfile
@@ -2127,8 +2140,23 @@ c.frame.log.selectTab('Log')
 c.frame.log.clearLog()
 #g.es(time_test(100, test_160_new), 'seconds iterator writer')
 #g.es(time_test(100, test_160_old), 'seconds old writer')
-g.es('success' if test_395() else 'failure')
-
+def test_all_valid():
+    i = 0
+    res = set()
+    for j, fn in valid_files():
+        ok = '.' if test_compare_n(j, True) else 'E'
+        if ok == 'E':
+            res.add(j)
+            if len(res) &gt; 5:break
+        g.es(ok, newline=i % 35 == 34)
+        i += 1
+    g.es('')
+    if res:
+        g.es(res)
+        return False
+    return True
+g.es('success' if test_all_valid() else 'failure')
+#g.es('success' if test_compare_n(250) else 'failure')
 </t>
 <t tx="vitalije.20170722124118.1">def prepare():
     p = starting_pos()
@@ -2166,7 +2194,7 @@ if m:
     for p, w, final in it:
         if w:
             yield w
-    yield conf.delim_st + '@-leo\n'
+    yield joiner(conf.delim_st, '@-leo', conf.delim_en, '\n')
     for line in conf.last:
         yield line
 @
@@ -2182,7 +2210,11 @@ if m:
 <t tx="vitalije.20170722144500.1">def needs_verbatim(line, conf):
     return line.lstrip().startswith(conf.delim_st + '@')</t>
 <t tx="vitalije.20170722151650.1">def joiner(*args):
-    return ''.join(args)</t>
+    try:
+        return ''.join(args)
+    except Exception as e:
+        g.es_exception(e)
+        g.trace(g.callers(10))</t>
 <t tx="vitalije.20170722173013.1">def open_node(p, conf):
     conf.in_doc = False
     return  joiner(conf.delim_st, '@+node:', p.gnx,
@@ -2342,5 +2374,55 @@ if conf.verbatim:
     yield p, joiner(conf.delim_st, '@verbatim\n'), True
     yield p, line, False
     continue</t>
+<t tx="vitalije.20170722212234.1">def test_compare_n(n, unitTesting=False):
+    try:
+        g.unitTesting = unitTesting
+        ok, p = do_import_file(n)
+        lines = get_lines(n)
+        conf = get_conf(p)
+        log = []
+        it = all_lines(p, conf)
+        it = line_completer(it, conf)
+        for i, line in enumerate(lines):
+            line2 = next(it,'------ None ------')
+            if len(log) &gt; 4:
+                log.pop(0)
+            log.append((i, line, line2))
+            if line != line2:
+                for n, a, b in log:
+                    g.es(n+1, a, newline=False)
+                    g.es(n+1, b, color='blue', newline=False)
+                return False
+                for j in range(i+1, i+5):
+                    g.es(j, lines[j], newline=False)
+                    g.es(j, next(it), newline=False, color='yellow')
+                return False
+        return True
+    finally:
+        p.doDelete()
+        clear_gnxDict()
+        g.unitTesting = False</t>
+<t tx="vitalije.20170722215608.1">def get_conf(p):
+    at = c.atFileCommands
+    at.scanAllDirectives(p)
+    ext = g.os_path_splitext(c.getNodeFileName(p))[1].lstrip('.')
+    #d = c.scanAllDirectives(p)
+    #lang = d.get('language')
+    # this is ugly hack, but of all files in leo distribution
+    # only this one 'build-leo.bat' was not properly written
+    # because computed language is 'python' when in fact it
+    # should be 'batch file'
+    return g.bunch(
+        delim_st = at.startSentinelComment,
+        delim_en = at.endSentinelComment,
+        in_doc=False,
+        in_others=False,
+        in_all=False,
+        verbatim=False,
+        zero_level=p.level(),
+        first=True,
+        count_first=0,
+        last=[]
+    )</t>
 </tnodes>
 </leo_file>
