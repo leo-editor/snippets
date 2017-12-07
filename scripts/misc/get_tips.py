@@ -22,7 +22,7 @@ URL = URL.replace('closed', 'open')
 def get_tips(data):
     """get_tips - get tips from GitHub issues
 
-    :param dict data: GitHub API
+    :param dict data: GitHub API issues list
     :return: list of Tips
     """
     tips = []
