@@ -22,15 +22,19 @@ if c.positionExists(p):
     g.es(g.os_path_join(path, filename))
     diff, err = Popen(['git', '-C', path, 'diff', filename],
         stdin=PIPE, stdout=PIPE, stderr=PIPE).communicate()
-    diff = diff.decode('utf-8')
-    # parsing a line like `@@ -564,27 +564,27 @@ class NNNModel:`
-    base = p.get_UNL(with_count=True, with_proto=True)
-    for line in diff.split('\n'):
-        if line.startswith('@@ '):
-            # line.split()[2] would be +564,27 in the above, the modified lines
-            line, lines = map(int, line.split()[2].split(','))
-            g.es("%3d lines @ %d" % (lines, line),
-                nodeLink="%s,%s" % (base, -(line+int(lines/2))))
-            # offset to the middle of the block, -ve indicates global line num.
+    if err:
+        g.es(err.decode('utf-8'))
+    else:
+        diff = diff.decode('utf-8')
+        # parsing a line like `@@ -564,27 +564,27 @@ class NNNModel:`
+        base = p.get_UNL(with_count=True, with_proto=True)
+        for line in diff.split('\n'):
+            if line.startswith('@@ '):
+                # line.split()[2] would be +564,27 in the above, the modified lines
+                line, lines = map(int, line.split()[2].split(','))
+                g.es("%3d lines @ %d" % (lines, line),
+                    nodeLink="%s,%s" % (base, -(line+int(lines/2))))
+                # offset to the middle of the block, -ve indicates global line num.
 else:
     g.es("Didn't find file")
+
