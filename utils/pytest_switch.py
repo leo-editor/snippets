@@ -4,7 +4,7 @@ switch between code and test
 If you're using `pytest`[1] and use the layout described below, this @button code
 will jump you between a function and its test, creating the (test)function
 if it doesn't already exist.  Also the tests folder and `test_foo.py` file.
-It assumes use of the `active_path` plugin which headlines folders are
+It assumes use of the `active_path` plugin which headlines folders as
 `/myFolder/` with body text `@path myFolder`.
 
 This code is very heavy on assumptions, but a lot of those are driven
