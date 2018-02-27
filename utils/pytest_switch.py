@@ -2,7 +2,7 @@
 switch between code and test
 
 If you're using `pytest`[1] and use the layout described below, this @button code
-will jump you between a function and its test, creating the (text)function
+will jump you between a function and its test, creating the (test)function
 if it doesn't already exist.  Also the tests folder and `test_foo.py` file.
 It assumes use of the `active_path` plugin which headlines folders are
 `/myFolder/` with body text `@path myFolder`.
@@ -11,7 +11,7 @@ This code is very heavy on assumptions, but a lot of those are driven
 by pytest default behavior.
 
 To run tests, use `python -m pytest`, as anything involving py.test is
-depracated, and for some reason `pytest` finds files but runs no tests.
+deprecated, and for some reason `pytest` finds files but runs no tests.
 Tested with pytest 3.x, note Ubuntu 16.04 seems to still be on 2.x
 
 Assumed layout:
