@@ -32,9 +32,9 @@ docmd () {
 HEAD="$TYPE $FILE"
 
 nd=$(docmd "nd = g.findNodeAnywhere(c, '$HEAD')" "bool(nd)")
-if [ "$nd" == 'False' ]; then
+if [ "$nd" == 'False' -o "$nd" == 'None' ]; then
     nd=$(docmd "nd = g.findTopLevelNode(c, 'Edits')" "bool(nd)")
-    if [ "$nd" == 'False' ]; then
+    if [ "$nd" == 'False' -o "$nd" == 'None' ]; then
         docmd "nd = c.rootPosition().insertAfter()" "nd.h = 'Edits'"
     fi;
     docmd "nd = nd.insertAsNthChild(0)" \
