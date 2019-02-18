@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Created by Leo: http://leoeditor.com/leo_toc.html -->
 <leo_file xmlns:leo="http://leoeditor.com/namespaces/leo-python-editor/1.1" >
-<leo_header file_format="2" tnodes="0" max_tnode_index="0" clone_windows="0"/>
-<globals body_outline_ratio="0.5" body_secondary_ratio="0.5">
-	<global_window_position top="50" left="50" height="500" width="700"/>
-	<global_log_window_position top="0" left="0" height="0" width="0"/>
-</globals>
+<leo_header file_format="2"/>
+<globals/>
 <preferences/>
 <find_panel_settings/>
 <vnodes>
-<v t="largo84.20170410113547.3" a="E"><vh>@settings</vh>
+<v t="largo84.20170410113547.3"><vh>@settings</vh>
 <v t="largo84.20170410113629.1"><vh>@data abbreviations</vh>
-<v t="largo84.20170410113721.1" a="E"><vh>LaTex (General)</vh>
+<v t="largo84.20170410113721.1"><vh>LaTex (General)</vh>
 <v t="largo84.20170410113721.2"><vh>Lists</vh></v>
 <v t="largo84.20170410113721.5"><vh>Text formatting</vh></v>
 <v t="largo84.20170410113801.1"><vh>Others</vh></v>
@@ -39,10 +36,10 @@
 <v t="largo84.20170410120436.29"><vh>&lt;|Part Name|&gt;</vh></v>
 </v>
 <v t="largo84.20170410120436.32"><vh>texdoc;;</vh>
-<v t="largo84.20170410120436.33" a="E"><vh>@@file &lt;|UDI|&gt; &lt;|Document|&gt;.tex</vh>
+<v t="largo84.20170410120436.33"><vh>@@file &lt;|UDI|&gt; &lt;|Document|&gt;.tex</vh>
 <v t="largo84.20170410120436.52"><vh>&lt;&lt; Paths &gt;&gt;</vh></v>
 <v t="largo84.20170410120436.53"><vh>&lt;&lt; Project Variables &gt;&gt;</vh></v>
-<v t="largo84.20170410120436.54" a="E"><vh>&lt;&lt; Document Variables &gt;&gt;</vh>
+<v t="largo84.20170410120436.54"><vh>&lt;&lt; Document Variables &gt;&gt;</vh>
 <v t="largo84.20170410120436.55"><vh>&lt;&lt; Fonts &gt;&gt;</vh></v>
 <v t="largo84.20170410120436.56"><vh>&lt;&lt; Packages &gt;&gt;</vh></v>
 <v t="largo84.20170410120436.57"><vh>&lt;&lt; Definitions &gt;&gt;</vh>
@@ -62,7 +59,7 @@
 <v t="largo84.20170410120436.51"><vh>@@file &lt;|UDI|&gt; &lt;|Training Manual|&gt;.tex</vh>
 <v t="largo84.20170410120436.52"></v>
 <v t="largo84.20170410120436.53"></v>
-<v t="largo84.20170410120436.54" a="E"></v>
+<v t="largo84.20170410120436.54"></v>
 <v t="largo84.20170410120436.68"><vh>&lt;&lt; Title Page &gt;&gt;</vh></v>
 <v t="largo84.20170410120436.69"><vh>&lt;&lt; Document Body &gt;&gt;</vh></v>
 </v>
@@ -73,17 +70,15 @@
 <v t="largo84.20170410123325.1"><vh>Workflow Overview</vh></v>
 <v t="largo84.20170410123813.1"><vh>Workflow Notes and Shortcuts</vh></v>
 <v t="largo84.20170410124219.1"><vh>Software Needed</vh></v>
-<v t="largo84.20170410124311.1" a="E"><vh>Document Example</vh>
+<v t="largo84.20170410124311.1"><vh>Document Example</vh>
 <v t="largo84.20170410124440.1"><vh>Resources</vh>
-<v t="largo84.20170410124929.1" a="E"><vh>(XXX-H120) Reusable Content</vh>
-<v t="largo84.20170410124935.1" a="E"><vh>@file Reusable Content.txi</vh></v>
+<v t="largo84.20170410124929.1"><vh>(XXX-H120) Reusable Content</vh>
+<v t="largo84.20170410124935.1" descendentVnodeUnknownAttributes="7d710058010000003071017d7102580500000069636f6e7371035d71047d710528580a00000076697375616c49636f6e710658010000003171075807000000796f666673657471084b005807000000786f666673657471094b02580400000066696c65710a583d000000443a2f53796e6365642f676974687562207265706f732f6c656f2f6c656f2f49636f6e732f66696c655f69636f6e732f66696c655f66696c652e706e67710b580400000074797065710c680a58020000006f6e710d5805000000766e6f6465710e580700000072656c50617468710f581800000066696c655f69636f6e732f66696c655f66696c652e706e677110580500000077686572657111580e0000006265666f7265486561646c696e65711258040000007870616471134b01756173732e"><vh>@file Reusable Content.txi</vh></v>
 </v>
 </v>
-<v t="largo84.20170410125918.1" a="E"><vh>Smith Grocery Company (the client)</vh>
-<v t="largo84.20170410130109.2"
-expanded="largo84.20170410130109.5,largo84.20170410130109.8,"><vh>@file SGC-H120 Reusable Content.tex</vh></v>
-<v t="largo84.20170410131222.2" a="E"
-expanded="largo84.20170410131222.8,largo84.20170410131222.12,largo84.20170410131222.17,"><vh>@file SGC-M110 Training Manual.tex</vh></v>
+<v t="largo84.20170410125918.1"><vh>Smith Grocery Company (the client)</vh>
+<v t="largo84.20170410130109.2" descendentVnodeUnknownAttributes="7d710058010000003071017d7102580500000069636f6e7371035d71047d710528580a00000076697375616c49636f6e710658010000003171075807000000796f666673657471084b005807000000786f666673657471094b02580400000066696c65710a583d000000443a2f53796e6365642f676974687562207265706f732f6c656f2f6c656f2f49636f6e732f66696c655f69636f6e732f66696c655f66696c652e706e67710b580400000074797065710c680a58020000006f6e710d5805000000766e6f6465710e580700000072656c50617468710f581800000066696c655f69636f6e732f66696c655f66696c652e706e677110580500000077686572657111580e0000006265666f7265486561646c696e65711258040000007870616471134b01756173732e"><vh>@file SGC-H120 Reusable Content.tex</vh></v>
+<v t="largo84.20170410131222.2" descendentVnodeUnknownAttributes="7d710058010000003071017d7102580500000069636f6e7371035d71047d710528580a00000076697375616c49636f6e710658010000003171075807000000796f666673657471084b005807000000786f666673657471094b02580400000066696c65710a583d000000443a2f53796e6365642f676974687562207265706f732f6c656f2f6c656f2f49636f6e732f66696c655f69636f6e732f66696c655f66696c652e706e67710b580400000074797065710c680a58020000006f6e710d5805000000766e6f6465710e580700000072656c50617468710f581800000066696c655f69636f6e732f66696c655f66696c652e706e677110580500000077686572657111580e0000006265666f7265486561646c696e65711258040000007870616471134b01756173732e"><vh>@file SGC-M110 Training Manual.tex</vh></v>
 </v>
 </v>
 </vnodes>
@@ -427,9 +422,11 @@ Add the following title page if desired. Otherwise, comment it out.
     * These shell documents allow for client-specific information to be added to the headers, footers and in some cases as variables inside the content area itself (using \theClient variable that I define).
 </t>
 <t tx="largo84.20170410124219.1">* Leo (of course, and its dependencies).
-* MiKTex for the LaTex distribution and package management (I have it set to auto-update as needed).
+* MiKTex for the LaTeX distribution and package management (I have it set to auto-update as needed).
 * TeXNicCenter for processing (typesetting) to PDF output.</t>
-<t tx="largo84.20170410124311.1">This example shows a content file (Resources)  and two document 'shells' (a student handout and a training manual) in the client directory.
+<t tx="largo84.20170410124311.1">@language tex
+
+This example shows a content file (Resources)  and two document 'shells' (a student handout and a training manual) in the client directory.
 </t>
 <t tx="largo84.20170410124440.1">@path Resources/
 </t>
@@ -437,7 +434,7 @@ Add the following title page if desired. Otherwise, comment it out.
 Client Abbreviation: SGC
 \newcommand{\theClient}{Smith Grocery Company} %Defined in the document preamble.
 The document prepared for SGC will have a Unique Document Identifier (UDI) of SGC-H120 and a revision date in the footer as in:
-    SGC-H120(17.04.10)
+    SGC-H120 (17.04.10)
 </t>
 <t tx="largo84.20170410125918.1">@path Client/
 The following files were created with the @outline-data tree-abbreviations `texdoc` and `texmanual` abbreviations.

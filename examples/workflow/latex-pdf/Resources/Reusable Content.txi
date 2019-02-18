@@ -1,19 +1,19 @@
-#@+leo-ver=5-thin
-#@+node:largo84.20170410124935.1: * @file Reusable Content.txi
-#@+others
-#@+node:largo84.20170410125206.1: ** First Paragraph
+%@+leo-ver=5-thin
+%@+node:largo84.20170410124935.1: * @file Reusable Content.txi
+%@+others
+%@+node:largo84.20170410125206.1: ** First Paragraph
 \paragraph{First Paragraph} This is my first paragraph of content.  I can add a reference to my client by using \theClient{} variable defined in the document preamble.
 
-\begin{solutionorlines}[\tinysbh]
+\begin{solutionorlines}[\tinysbh] %\tinysbh is a prefined unit of length I create in the preamble. There are also \smallsbh, \medium...\large... and \huge...
 
     Facilitator notes for the first paragraph. Students only see a few blank lines they may use to take notes.
 \end{solutionorlines}
-#@+node:largo84.20170410125334.1: ** Second Paragraph
+%@+node:largo84.20170410125334.1: ** Second Paragraph
 \paragraph{Second Paragraph} This is my second paragraph of content.
 
 \begin{solutionorlines}[\hugesbh]
 
     Facilitator notes for my second paragraph. Students will only see blank lines for note taking.
 \end{solutionorlines}
-#@-others
-#@-leo
+%@-others
+%@-leo
