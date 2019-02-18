@@ -1,0 +1,9 @@
+%@+leo-ver=5-thin
+%@+node:largo84.20190218170416.7: * @file Client Variables.txi
+\newcommand{\theClient}{Smith Grocery Company} %Insert full company name.
+\newcommand{\SGC}{\theClient}
+\newcommand{\theClientName}{Sally Smith} %Insert client agent's name. If unknown, use \hrulefill
+\newcommand{\theClientTitle}{President} %Insert client agent's title. If unknown, use \hrulefill
+\newcommand{\DSR}{DSR} %Default definition for a company's sales rep.
+\newcommand{\DSRs}{DSRs} %Default definition for a company's sales reps (plural).
+%@-leo
